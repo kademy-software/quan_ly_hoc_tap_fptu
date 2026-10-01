@@ -42,6 +42,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <button type="submit" class="btn btn-accent" style="width:100%">Đăng nhập</button>
         </form>
+
+        <p style="margin: 16px 0 0; text-align: center;">
+            Chưa có tài khoản? <a href="register.php" style="color: var(--accent); font-weight: 700;">Đăng ký</a>
+        </p>
     </div>
 </div>
 </body>
