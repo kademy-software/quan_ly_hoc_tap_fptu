@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOC & Academy Admin Desk - T48 Simulator | Học Viện An Ninh Nhân Dân</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts: Be Vietnam Pro & JetBrains Mono (Hỗ trợ 100% tiếng Việt chuẩn mực, sắc nét) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            t48: {
+              950: '#060a12',
+              900: '#0b1322',
+              850: '#0f1a2e',
+              800: '#14233c',
+              700: '#1e3458',
+              accent: '#38bdf8',
+              gold: '#f59e0b',
+              emerald: '#10b981',
+              crimson: '#ef4444'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Thanh cuộn phong cách T48 Cyber */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b1322;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e3458;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2d4c7d;
+    }
+
+    /* Hiệu ứng lưới giám sát an ninh */
+    .grid-matrix {
+      background-size: 24px 24px;
+      background-image: 
+        linear-gradient(to right, rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+    }
+
+    /* Highlight cú pháp pháp y & mã độc */
+    .hl-danger { color: #f43f5e; font-weight: 700; text-shadow: 0 0 6px rgba(244,63,94,0.35); }
+    .hl-cmd { color: #fbbf24; font-weight: 700; text-shadow: 0 0 6px rgba(251,191,36,0.3); }
+    .hl-ip { color: #38bdf8; font-weight: 600; text-decoration: underline dotted; }
+    .hl-mac { color: #a78bfa; font-weight: 600; }
+    .hl-error { color: #ef4444; background: rgba(239,68,68,0.15); padding: 1px 4px; border-radius: 3px; font-weight: 700; }
+
+    .glow-red { box-shadow: 0 0 12px rgba(239, 68, 68, 0.35); }
+    .glow-amber { box-shadow: 0 0 12px rgba(245, 158, 11, 0.35); }
+    .glow-emerald { box-shadow: 0 0 12px rgba(16, 185, 129, 0.35); }
+  </style>
+</head>
+
+<body class="bg-[#060a12] text-slate-200 min-h-screen flex flex-col font-sans selection:bg-sky-500/30 selection:text-sky-200 antialiased grid-matrix">
+
+  <!-- ======================================================== -->
+  <!-- HEADER ĐIỀU HÀNH AN NINH T48                             -->
+  <!-- ======================================================== -->
+  <header class="h-16 border-b border-slate-800 bg-[#09101d]/95 backdrop-blur-md px-4 flex items-center justify-between z-20 sticky top-0 shadow-lg shadow-black/40">
+    <div class="flex items-center space-x-3.5">
+      <!-- Biểu trưng An ninh T48 -->
+      <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-amber-500 via-sky-600 to-indigo-600 p-0.5 flex items-center justify-center shadow-lg shadow-sky-900/30">
+        <div class="w-full h-full bg-[#070d18] rounded-[6px] flex items-center justify-center">
+          <i data-lucide="shield-check" class="w-5 h-5 text-amber-400"></i>
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold text-base md:text-lg tracking-wide text-amber-400">HỌC VIỆN AN NINH NHÂN DÂN</span>
+          <span class="text-[10px] bg-slate-800 text-sky-400 border border-sky-500/40 font-mono px-2 py-0.5 rounded font-semibold uppercase">T48 - TRUNG TÂM SOC & QUẢN TRỊ MẠNG</span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-mono">Hệ thống Trực ban Điều hành An ninh mạng & Quản trị Thông tin Học viện (T48 Simulator)</p>
+      </div>
+    </div>
+
+    <!-- Thông số Trực chiến Trực ban -->
+    <div class="hidden lg:flex items-center space-x-6 text-xs font-mono">
+      <div class="flex items-center space-x-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="text-slate-400">TRỰC BAN:</span>
+        <span class="text-emerald-400 font-bold" id="header-status">SẴN SÀNG TÁC CHIẾN</span>
+      </div>
+      <div class="flex items-center space-x-2 text-slate-400">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span id="live-clock">00:00:00 ICT</span>
+      </div>
+      <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1 rounded">
+        <i data-lucide="user-check" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span class="text-slate-300">VAI TRÒ: <strong class="text-white">Cán bộ Quản trị & SOC T48</strong></span>
+      </div>
+    </div>
+
+    <!-- Nút Thao tác nhanh -->
+    <div class="flex items-center space-x-2">
+      <button onclick="resetSimulator()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-md flex items-center space-x-1.5 transition">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span class="hidden sm:inline">Khởi động lại</span>
+      </button>
+      <button onclick="toggleAudio()" id="btn-audio" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-amber-400 border border-slate-700 rounded-md transition" title="Bật/Tắt âm thanh hiệu ứng">
+        <i data-lucide="volume-2" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- KHÔNG GIAN LÀM VIỆC 3 CỘT (GRID SYSTEM)                 -->
+  <!-- ======================================================== -->
+  <main class="flex-1 p-3 md:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4 overflow-hidden">
+    
+    <!-- ====================================================== -->
+    <!-- CỘT 1 (3/12): HỘP THƯ TICKET & BỘ LỌC ĐA NĂNG           -->
+    <!-- ====================================================== -->
+    <section class="lg:col-span-3 flex flex-col bg-[#0b1322]/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl shadow-black/30">
+      
+      <!-- Tiêu đề Cột 1 -->
+      <div class="p-3 border-b border-slate-800 bg-[#0e192c] flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="inbox" class="w-4 h-4 text-sky-400"></i>
+          <h2 class="font-bold text-sm uppercase tracking-wide text-slate-100">Hàng Đợi Yêu Cầu</h2>
+        </div>
+        <span id="queue-badge" class="px-2 py-0.5 text-xs font-mono rounded bg-sky-950/80 border border-sky-500/40 text-sky-400 font-bold">3 Chờ Xử Lý</span>
+      </div>
+
+      <!-- Thẻ lọc 4 nhóm -->
+      <div class="p-2 border-b border-slate-800/80 bg-slate-900/60 grid grid-cols-4 gap-1 text-[11px] font-mono">
+        <button onclick="setFilter('all')" id="tab-filter-all" class="filter-tab py-1.5 rounded font-medium text-center transition bg-sky-600/20 text-sky-300 border border-sky-500/40">Tất Cả</button>
+        <button onclick="setFilter('security')" id="tab-filter-security" class="filter-tab py-1.5 rounded font-medium text-center transition hover:bg-slate-800 text-slate-400 border border-transparent">An Ninh</button>
+        <button onclick="setFilter('mac')" id="tab-filter-mac" class="filter-tab py-1.5 rounded font-medium text-center transition hover:bg-slate-800 text-slate-400 border border-transparent">Đ.Ký MAC</button>
+        <button onclick="setFilter('notice')" id="tab-filter-notice" class="filter-tab py-1.5 rounded font-medium text-center transition hover:bg-slate-800 text-slate-400 border border-transparent">Thông Báo</button>
+      </div>
+
+      <!-- Thanh tìm kiếm nhanh -->
+      <div class="p-2 border-b border-slate-800 bg-[#070d18]">
+        <div class="relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5"></i>
+          <input type="text" id="ticket-search" oninput="renderTicketList()" placeholder="Tìm theo mã, lớp học viên, MAC, IP..." 
+                 class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded text-slate-200 placeholder-slate-500 focus:outline-none focus:border-sky-500 font-mono transition">
+        </div>
+      </div>
+
+      <!-- Danh sách Ticket cuộn -->
+      <div id="ticket-list" class="flex-1 overflow-y-auto p-2 space-y-2">
+        <!-- Render động từ JavaScript -->
+      </div>
+
+      <!-- Chân Cột 1 -->
+      <div class="p-2.5 bg-[#070d18] border-t border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+        <span class="flex items-center space-x-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span>Đồng Hồ SLA T48</span>
+        </span>
+        <button onclick="simulateNewTicket()" class="text-xs text-sky-400 hover:text-sky-300 hover:underline flex items-center space-x-1 font-semibold">
+          <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+          <span>Thêm Ticket Diễn Tập</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- CỘT 2 (6/12): KHU VỰC PHÂN TÍCH & CÔNG CỤ WORKSPACE    -->
+    <!-- ====================================================== -->
+    <section class="lg:col-span-6 flex flex-col bg-[#0b1322]/90 border border-slate-800 rounded-xl overflow-hidden shadow-xl shadow-black/30">
+      
+      <!-- Thanh chuyển Tab công cụ -->
+      <div class="border-b border-slate-800 bg-[#0e192c] flex items-center justify-between px-3">
+        <div class="flex space-x-1 overflow-x-auto py-2">
+          <button onclick="switchTab('detail')" id="tab-btn-detail" class="ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 bg-slate-800 text-sky-300 border border-sky-500/40">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span>Chi Tiết Sự Cố</span>
+          </button>
+          <button onclick="switchTab('maclookup')" id="tab-btn-maclookup" class="ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 text-slate-400 hover:bg-slate-800/60 border border-transparent">
+            <i data-lucide="network" class="w-3.5 h-3.5"></i>
+            <span>Tra Cứu MAC & Gán IP</span>
+          </button>
+          <button onclick="switchTab('logs')" id="tab-btn-logs" class="ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 text-slate-400 hover:bg-slate-800/60 border border-transparent">
+            <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+            <span>Nhật Ký & Header</span>
+          </button>
+          <button onclick="switchTab('broadcast')" id="tab-btn-broadcast" class="ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 text-slate-400 hover:bg-slate-800/60 border border-transparent">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>Phát Thông Báo Khẩn</span>
+          </button>
+          <button onclick="switchTab('decoder')" id="tab-btn-decoder" class="ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 text-slate-400 hover:bg-slate-800/60 border border-transparent">
+            <i data-lucide="binary" class="w-3.5 h-3.5"></i>
+            <span>Giải Mã Dấu Vết</span>
+          </button>
+        </div>
+
+        <!-- Mã hiệu Ticket đang chọn -->
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-mono bg-slate-900 border border-slate-700 px-2 py-1 rounded">
+          <span class="text-slate-400">PHIẾU:</span>
+          <span class="text-amber-400 font-bold" id="lbl-active-ticket-id">#T48-MAC-01</span>
+        </div>
+      </div>
+
+      <!-- Không gian nội dung Tab (Cuộn độc lập) -->
+      <div class="flex-1 overflow-y-auto p-4" id="workspace-content">
+        
+        <!-- ================= TAB 1: CHI TIẾT SỰ CỐ ================= -->
+        <div id="pane-detail" class="space-y-4">
+          <div class="bg-gradient-to-r from-slate-900 via-[#0e1a2f] to-slate-900 border border-slate-800 rounded-lg p-4">
+            
+            <div class="flex flex-wrap items-start justify-between gap-2 mb-2">
+              <div class="flex items-center space-x-2">
+                <span id="detail-sev-badge" class="px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase bg-amber-950 text-amber-400 border border-amber-500/50">MỨC ĐỘ: CAO</span>
+                <span id="detail-type-badge" class="px-2 py-0.5 rounded text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700">An Ninh Mạng</span>
+              </div>
+              <div class="text-xs font-mono text-slate-400 flex items-center space-x-1.5">
+                <i data-lucide="timer" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>Thời hạn giải quyết (SLA): <strong id="detail-sla-countdown" class="text-amber-300 font-bold">12m 40s</strong></span>
+              </div>
+            </div>
+
+            <h1 id="detail-title" class="text-lg md:text-xl font-bold tracking-wide text-white mb-2">Đang tải tiêu đề sự cố...</h1>
+            <p id="detail-desc" class="text-xs md:text-sm text-slate-300 leading-relaxed mb-4">
+              Nội dung mô tả chi tiết yêu cầu/sự cố an ninh sẽ xuất hiện ở đây.
+            </p>
+
+            <!-- Thông số đối tượng liên quan -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-slate-800 text-xs font-mono">
+              <div class="bg-slate-950/60 p-2.5 rounded border border-slate-800/80">
+                <div class="text-[10px] text-slate-500 uppercase">Đối tượng / Học viên</div>
+                <div id="detail-sender" class="text-sky-300 font-semibold truncate">-</div>
+              </div>
+              <div class="bg-slate-950/60 p-2.5 rounded border border-slate-800/80">
+                <div class="text-[10px] text-slate-500 uppercase">Lớp / Đơn vị</div>
+                <div id="detail-unit" class="text-amber-300 font-semibold truncate">-</div>
+              </div>
+              <div class="bg-slate-950/60 p-2.5 rounded border border-slate-800/80">
+                <div class="text-[10px] text-slate-500 uppercase">Địa chỉ MAC / Thiết bị</div>
+                <div id="detail-mac" class="text-purple-300 font-semibold truncate">-</div>
+              </div>
+              <div class="bg-slate-950/60 p-2.5 rounded border border-slate-800/80">
+                <div class="text-[10px] text-slate-500 uppercase">Vị trí kết nối / Switch</div>
+                <div id="detail-location" class="text-emerald-300 font-semibold truncate">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thông số kỹ thuật điều tra nhanh -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3.5 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-mono font-bold text-slate-200 flex items-center space-x-1.5">
+                <i data-lucide="fingerprint" class="w-4 h-4 text-sky-400"></i>
+                <span>Chỉ Số Nhận Dạng & Dấu Vết Kỹ Thuật (Artifacts)</span>
+              </h3>
+              <span class="text-[10px] font-mono text-slate-500">Hệ Thống Kiểm Soát T48</span>
+            </div>
+            <div id="detail-artifacts" class="flex flex-wrap gap-2 pt-1">
+              <!-- Render động -->
+            </div>
+          </div>
+
+          <!-- Quy chuẩn SOP ứng phó -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3.5">
+            <h3 class="text-xs font-mono font-bold text-slate-200 flex items-center space-x-1.5 mb-2">
+              <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i>
+              <span>Hướng Dẫn Xử Lý Tiêu Chuẩn (SOP Guidance)</span>
+            </h3>
+            <ul id="detail-sop-list" class="space-y-1 text-xs text-slate-300 list-disc list-inside">
+              <!-- Render động -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- ================= TAB 2: TRA CỨU MAC/OUI & GÁN IP-MAC ================= -->
+        <div id="pane-maclookup" class="hidden space-y-4">
+          <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-lg space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-mono font-bold text-slate-200 flex items-center space-x-2">
+                <i data-lucide="search" class="w-4 h-4 text-sky-400"></i>
+                <span>Công Cụ Tra Cứu OUI / Hãng Sản Xuất & Bảng Gán IP-MAC</span>
+              </h3>
+              <span class="text-[10px] font-mono text-slate-400">DHCP & RADIUS T48</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Kiểm tra tính hợp lệ của địa chỉ MAC máy tính học viên gửi lên hoặc phát hiện MAC ngẫu nhiên / thiết bị lạ trong mạng nội bộ Học viện.
+            </p>
+
+            <div class="flex gap-2">
+              <input type="text" id="mac-search-input" placeholder="Ví dụ: 3C:06:30:11:22:33 hoặc A4:83:E7:..." 
+                     class="flex-1 px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded font-mono text-slate-200 focus:outline-none focus:border-sky-500">
+              <button onclick="lookupMACAction()" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-slate-950 font-bold text-xs rounded font-mono transition flex items-center space-x-1.5">
+                <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                <span>Tra Cứu OUI</span>
+              </button>
+            </div>
+
+            <!-- Kết quả tra cứu MAC -->
+            <div id="mac-result-card" class="bg-slate-950 p-3.5 rounded border border-slate-800 text-xs font-mono space-y-2">
+              <div class="text-slate-500 text-center py-4">Nhập địa chỉ MAC hoặc bấm "Lấy MAC sự cố" để kiểm tra nhà sản xuất.</div>
+            </div>
+
+            <!-- Nút thao tác nhanh gán vào White/Blacklist mô phỏng -->
+            <div class="flex gap-2 pt-2 border-t border-slate-800/80">
+              <button onclick="fillCurrentTicketMAC()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 rounded text-xs font-mono">
+                Lấy MAC Từ Phiếu Đang Xem
+              </button>
+            </div>
+          </div>
+
+          <!-- Bảng phân bổ IP-MAC tại Học viện -->
+          <div class="bg-slate-900/60 border border-slate-800 rounded-lg p-3">
+            <h4 class="text-xs font-mono font-bold text-slate-300 mb-2">Bảng Ánh Xạ ARP / DHCP Mới Nhất Tại Học Viện An Ninh:</h4>
+            <div class="overflow-x-auto text-[11px] font-mono">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-800 text-slate-400">
+                    <th class="py-1 px-2">Địa Chỉ IP</th>
+                    <th class="py-1 px-2">Địa Chỉ MAC</th>
+                    <th class="py-1 px-2">Hãng Thiết Bị</th>
+                    <th class="py-1 px-2">Khu Vực / VLAN</th>
+                    <th class="py-1 px-2">Trạng Thái</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                  <tr>
+                    <td class="py-1.5 px-2 text-sky-400">10.48.10.25</td>
+                    <td class="py-1.5 px-2">3C:06:30:11:22:33</td>
+                    <td class="py-1.5 px-2">Apple MacBook Pro</td>
+                    <td class="py-1.5 px-2">VLAN 10 - Thư Viện</td>
+                    <td class="py-1.5 px-2 text-emerald-400">Đang chờ duyệt</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 px-2 text-rose-400">10.48.20.105</td>
+                    <td class="py-1.5 px-2">00:50:56:C0:00:08</td>
+                    <td class="py-1.5 px-2 text-rose-400 font-bold">VMware (Máy Ảo Giả Mạo)</td>
+                    <td class="py-1.5 px-2">VLAN 20 - KTX Nhà D3</td>
+                    <td class="py-1.5 px-2 text-rose-400 font-bold">Cảnh báo Spoofing</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 px-2 text-slate-400">10.48.1.1</td>
+                    <td class="py-1.5 px-2">E4:AA:5D:88:99:00</td>
+                    <td class="py-1.5 px-2">Cisco Core Switch T48</td>
+                    <td class="py-1.5 px-2">VLAN 1 - Quản Trị</td>
+                    <td class="py-1.5 px-2 text-sky-400">Bảo mật chuẩn</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TAB 3: TRÌNH ĐỌC LOG & EMAIL HEADER ================= -->
+        <div id="pane-logs" class="hidden space-y-3">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <div class="flex items-center space-x-2 text-slate-400">
+              <i data-lucide="code" class="w-4 h-4 text-emerald-400"></i>
+              <span>NGUỒN LOG: <span id="log-format-title" class="text-slate-200 font-bold">RADIUS / SYSLOG</span></span>
+            </div>
+            <button onclick="copyCurrentLog()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-[11px] flex items-center space-x-1">
+              <i data-lucide="copy" class="w-3 h-3"></i>
+              <span>Sao chép log</span>
+            </button>
+          </div>
+
+          <!-- Khung xem log có highlight cú pháp -->
+          <div class="relative rounded-lg overflow-hidden border border-slate-800 bg-[#060a12] shadow-inner font-mono text-xs">
+            <div class="bg-slate-950 px-3 py-1.5 border-b border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+              <div class="flex items-center space-x-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80"></span>
+                <span class="ml-2 font-mono text-slate-300" id="log-file-name">t48_audit.log</span>
+              </div>
+              <span class="text-[10px] text-slate-500">Tô màu từ khóa: MAC / IP / Cảnh báo / Lệnh</span>
+            </div>
+            <div class="p-4 overflow-x-auto max-h-[460px] whitespace-pre leading-relaxed select-text font-mono" id="log-code-viewer">
+              <!-- Highlighted text -->
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono italic">
+            * Màu sắc: <span class="text-rose-400 font-bold">Dấu hiệu vi phạm / Báo động đỏ</span>, <span class="text-amber-400 font-bold">Cảnh báo</span>, <span class="text-sky-400 font-bold">Địa chỉ IP</span>, <span class="text-purple-400 font-bold">Địa chỉ MAC</span>.
+          </div>
+        </div>
+
+        <!-- ================= TAB 4: PHÁT THÔNG BÁO HÀNG LOẠT (MASS NOTIFICATION) ================= -->
+        <div id="pane-broadcast" class="hidden space-y-4">
+          <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-lg space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-mono font-bold text-slate-200 flex items-center space-x-2">
+                <i data-lucide="megaphone" class="w-4 h-4 text-amber-400"></i>
+                <span>Cổng Phát Thông Báo Đào Tạo & An Ninh Toàn Trường (T48 Broadcast)</span>
+              </h3>
+              <span class="text-[10px] font-mono text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded bg-emerald-950/60">Kênh Chính Thức</span>
+            </div>
+            
+            <p class="text-xs text-slate-400">
+              Công cụ gửi thông báo khẩn cấp từ Ban Giám đốc và Phòng Quản lý Đào tạo tới cổng sinh viên, ứng dụng di động nội bộ và màn hình bảng tin điện tử Học viện.
+            </p>
+
+            <div class="space-y-2.5">
+              <div>
+                <label class="block text-[11px] font-mono text-slate-400 mb-1">Tiêu Đề Bản Tin Cảnh Báo / Thông Báo:</label>
+                <input type="text" id="bc-title" placeholder="Nhập tiêu đề thông báo..." 
+                       class="w-full px-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded font-mono text-slate-200 focus:outline-none focus:border-amber-500">
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Đối Tượng Nhận Tin:</label>
+                  <select id="bc-target" class="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded text-slate-200">
+                    <option value="all">Toàn thể Cán bộ & Học viên T48</option>
+                    <option value="students">Toàn thể Học viên các khóa</option>
+                    <option value="teachers">Giảng viên & Cán bộ Quản lý</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] text-slate-400 mb-1">Mức Độ Ưu Tiên:</label>
+                  <select id="bc-priority" class="w-full px-2.5 py-1.5 bg-slate-950 border border-slate-800 rounded text-amber-400 font-bold">
+                    <option value="high">Khẩn Cấp - Yêu Cầu Đọc Ngay</option>
+                    <option value="normal">Thông Thường</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-mono text-slate-400 mb-1">Nội Dung Chỉ Đạo Chi Tiết:</label>
+                <textarea id="bc-content" rows="4" placeholder="Nhập nội dung thông báo..." 
+                          class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded font-mono text-xs text-slate-200 focus:outline-none focus:border-amber-500"></textarea>
+              </div>
+
+              <div class="flex items-center justify-between pt-1">
+                <button onclick="loadTemplateBroadcast()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono rounded">
+                  Nạp Nội Dung Từ Phiếu Chỉ Đạo
+                </button>
+                <button onclick="dispatchBroadcast()" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs font-mono rounded flex items-center space-x-1.5 transition">
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                  <span>Phát Ngay Lập Tức</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Xem trước bản tin gửi đi -->
+            <div id="bc-preview-box" class="hidden p-3 bg-slate-950 border border-amber-500/40 rounded-lg text-xs space-y-1">
+              <div class="flex items-center justify-between text-amber-400 font-bold font-mono">
+                <span id="prev-bc-title">THÔNG BÁO</span>
+                <span class="text-[10px] text-slate-500">VỪA PHÁT HÀNH</span>
+              </div>
+              <p id="prev-bc-body" class="text-slate-300"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= TAB 5: GIẢI MÃ DẤU VẾT & HASH ================= -->
+        <div id="pane-decoder" class="hidden space-y-4">
+          <div class="bg-slate-900/80 border border-slate-800 p-4 rounded-lg space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-mono font-bold text-slate-200 flex items-center space-x-2">
+                <i data-lucide="binary" class="w-4 h-4 text-sky-400"></i>
+                <span>Trạm Giải Mã Base64 / Hex / Hash An Ninh Số</span>
+              </h3>
+              <span class="text-[10px] font-mono text-slate-400">Sandbox Cô Lập</span>
+            </div>
+            
+            <p class="text-xs text-slate-400">
+              Hỗ trợ cán bộ phân tích bóc tách các chuỗi lệnh làm mờ (obfuscation), đường dẫn tệp tải ngầm hoặc mã băm trích xuất từ các cuộc tấn công.
+            </p>
+
+            <textarea id="decoder-input" rows="3" placeholder="Dán chuỗi cần giải mã (Base64 hoặc Hex)..." 
+                      class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded font-mono text-xs text-slate-200 focus:outline-none focus:border-sky-500"></textarea>
+
+            <div class="flex flex-wrap gap-2">
+              <button onclick="decodeBase64()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/30 rounded text-xs font-mono flex items-center space-x-1.5">
+                <i data-lucide="code" class="w-3.5 h-3.5"></i>
+                <span>Giải Mã Base64</span>
+              </button>
+              <button onclick="decodeHex()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 rounded text-xs font-mono flex items-center space-x-1.5">
+                <i data-lucide="hash" class="w-3.5 h-3.5"></i>
+                <span>Chuyển Đổi Hex &rarr; Ký Tự</span>
+              </button>
+              <button onclick="calculateSimpleHash()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded text-xs font-mono flex items-center space-x-1.5">
+                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                <span>Băm SHA-256 Checksum</span>
+              </button>
+              <button onclick="loadTicketSamplePayload()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700 rounded text-xs font-mono ml-auto">
+                Lấy Chuỗi Từ Vụ Việc
+              </button>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-mono text-slate-400 mb-1">Kết Quả Phân Tích & Bóc Tách:</label>
+              <div id="decoder-output" class="p-3 bg-[#060a12] border border-slate-800 rounded font-mono text-xs text-emerald-400 min-h-[70px] select-all whitespace-pre-wrap break-all">
+                (Đang chờ nhập dữ liệu...)
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====================================================== -->
+    <!-- CỘT 3 (3/12): BẢNG ĐIỀU KHIỂN HÀNH ĐỘNG & ĐIỂM KPI      -->
+    <!-- ====================================================== -->
+    <section class="lg:col-span-3 flex flex-col space-y-3">
+      
+      <!-- Bảng Điểm KPI Cán Bộ Quản Trị T48 -->
+      <div class="bg-[#0b1322]/90 border border-slate-800 rounded-xl p-4 shadow-xl shadow-black/30">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-100">Chỉ Số Năng Lực KPI</h2>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/40 font-bold" id="kpi-rank-badge">Cán Bộ Trực Ban</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5 mt-3">
+          <!-- Điểm Uy Tín / Điểm Nghiệp Vụ -->
+          <div class="bg-[#070d18] border border-slate-800 p-2.5 rounded-lg">
+            <div class="text-[10px] font-mono text-slate-400 uppercase flex items-center justify-between">
+              <span>Điểm Uy Tín</span>
+              <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
+            </div>
+            <div class="text-xl font-bold font-mono text-emerald-400 mt-1" id="stat-reputation">100%</div>
+          </div>
+
+          <!-- Tổng Điểm Đạt Được -->
+          <div class="bg-[#070d18] border border-slate-800 p-2.5 rounded-lg">
+            <div class="text-[10px] font-mono text-slate-400 uppercase flex items-center justify-between">
+              <span>Tổng Điểm KPI</span>
+              <i data-lucide="zap" class="w-3 h-3 text-amber-400"></i>
+            </div>
+            <div class="text-xl font-bold font-mono text-amber-400 mt-1" id="stat-score">0</div>
+          </div>
+
+          <!-- Tỷ lệ chuẩn SLA -->
+          <div class="bg-[#070d18] border border-slate-800 p-2.5 rounded-lg">
+            <div class="text-[10px] font-mono text-slate-400 uppercase flex items-center justify-between">
+              <span>Đạt Chuẩn SLA</span>
+              <i data-lucide="clock" class="w-3 h-3 text-sky-400"></i>
+            </div>
+            <div class="text-base font-bold font-mono text-slate-200 mt-1" id="stat-sla-rate">100%</div>
+          </div>
+
+          <!-- Số Ticket đã hoàn thành -->
+          <div class="bg-[#070d18] border border-slate-800 p-2.5 rounded-lg">
+            <div class="text-[10px] font-mono text-slate-400 uppercase flex items-center justify-between">
+              <span>Đã Xử Lý</span>
+              <i data-lucide="check-check" class="w-3 h-3 text-purple-400"></i>
+            </div>
+            <div class="text-base font-bold font-mono text-slate-200 mt-1" id="stat-resolved">0 / 3</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bảng Điều Khiển Hành Động (Action Console) -->
+      <div class="bg-[#0b1322]/90 border border-slate-800 rounded-xl p-4 flex-1 flex flex-col shadow-xl shadow-black/30">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-sky-400"></i>
+            <h2 class="font-bold text-sm uppercase tracking-wider text-slate-100">Bảng Lệnh Hành Động</h2>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400">SOP T48</span>
+        </div>
+
+        <p class="text-xs text-slate-400 font-sans mt-3 mb-2">
+          Căn cứ tính chất sự cố, lựa chọn các biện pháp kỹ thuật và nghiệp vụ phù hợp theo đúng quy trình Học viện:
+        </p>
+
+        <!-- Danh sách Checkbox hành động -->
+        <div class="space-y-2 flex-1 overflow-y-auto pr-1" id="action-checklist">
+          
+          <!-- Duyệt Whitelist MAC -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="whitelist_mac" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-emerald-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Duyệt Whitelist MAC</span>
+                <span class="text-[10px] text-emerald-400 font-mono">(Wi-Fi Học Viện)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Thêm MAC hợp lệ của học viên vào danh sách cho phép kết nối mạng Wi-Fi.</div>
+            </div>
+          </label>
+
+          <!-- Cho vào Blacklist / Chặn MAC -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="blacklist_mac" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-rose-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Cho vào Blacklist / Chặn MAC</span>
+                <span class="text-[10px] text-rose-400 font-mono">(RADIUS / WLC)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Khóa vĩnh viễn địa chỉ MAC giả mạo hoặc thiết bị phát tán tấn công.</div>
+            </div>
+          </label>
+
+          <!-- Cách ly Cổng / Switch -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="isolate_port" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-rose-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Cách Ly Cổng / Switch Mạng</span>
+                <span class="text-[10px] text-amber-400 font-mono">(Port Security)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Ngắt cổng mạng trên Switch tại khu vực vi phạm (KTX / Giảng đường) để cô lập.</div>
+            </div>
+          </label>
+
+          <!-- Khóa Tài khoản / Reset Pass -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="reset_account" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-rose-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Khóa Tài Khoản / Reset Pass</span>
+                <span class="text-[10px] text-purple-400 font-mono">(Cổng Sinh Viên)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Vô hiệu hóa phiên đăng nhập bị lộ và bắt buộc đổi mật khẩu có độ dài an toàn.</div>
+            </div>
+          </label>
+
+          <!-- Chặn IP Độc hại -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="block_ip" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-rose-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Chặn IP Độc Hại Trên Firewall</span>
+                <span class="text-[10px] text-sky-400 font-mono">(Tường Lửa T48)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Áp quy tắc Drop toàn bộ gói tin từ địa chỉ IP nguồn có dấu hiệu dò quét.</div>
+            </div>
+          </label>
+
+          <!-- Soạn & Phát Thông báo Toàn trường -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="broadcast_notice" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Soạn & Phát Thông Báo Toàn Trường</span>
+                <span class="text-[10px] text-amber-400 font-mono">(Phòng Đào Tạo)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Gửi thông báo nâng cao cảnh giác, hướng dẫn cài đặt hoặc cập nhật lịch trình.</div>
+            </div>
+          </label>
+
+          <!-- Báo cáo Cấp trên -->
+          <label class="action-item flex items-start space-x-3 p-2.5 bg-slate-900/90 hover:bg-slate-800/70 border border-slate-800 rounded-lg cursor-pointer transition select-none group">
+            <input type="checkbox" value="escalate_superior" class="response-checkbox mt-0.5 rounded bg-slate-950 border-slate-700 text-sky-500 focus:ring-0">
+            <div class="text-xs">
+              <div class="font-mono font-medium text-slate-200 group-hover:text-white flex items-center space-x-1.5">
+                <span>Báo Cáo Ban Giám Đốc / Đơn Vị Nghiệp Vụ</span>
+                <span class="text-[10px] text-indigo-400 font-mono">(Báo Cáo Tác Chiến)</span>
+              </div>
+              <div class="text-slate-400 text-[11px] mt-0.5">Lập hồ sơ báo cáo lên Trưởng phòng Hậu cần / Ban Giám đốc Học viện.</div>
+            </div>
+          </label>
+
+        </div>
+
+        <!-- Nút Xác nhận xử lý -->
+        <div class="pt-3 border-t border-slate-800 mt-2 space-y-2">
+          <button id="btn-submit-action" onclick="handleSubmitResponse()" 
+                  class="w-full py-2.5 px-4 bg-gradient-to-r from-sky-600 via-indigo-600 to-amber-600 hover:from-sky-500 hover:to-amber-500 text-white font-bold text-sm tracking-wider uppercase rounded-lg shadow-lg shadow-sky-950/40 transition active:scale-[0.98] flex items-center justify-center space-x-2">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Xác Nhận Xử Lý Theo SOP</span>
+          </button>
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 px-1">
+            <span>Điểm KPI: +100 / -50</span>
+            <button onclick="clearCheckedActions()" class="text-slate-400 hover:text-slate-200 underline">Bỏ chọn hết</button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL ĐÁNH GIÁ THỰC THI & PHẢN HỒI SOP                    -->
+  <!-- ======================================================== -->
+  <div id="eval-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#0e192c] border border-slate-700 rounded-xl max-w-lg w-full p-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Đầu Modal -->
+      <div class="flex items-start justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center space-x-3">
+          <div id="modal-icon-wrapper" class="w-10 h-10 rounded-lg flex items-center justify-center">
+            <!-- Icon động -->
+          </div>
+          <div>
+            <h3 id="modal-headline" class="text-base font-bold uppercase tracking-wide">Kết Quả Đánh Giá Xử Lý</h3>
+            <p id="modal-subheadline" class="text-xs font-mono text-slate-400">Kiểm Soát Quy Trình Vận Hành Tiêu Chuẩn (SOP T48)</p>
+          </div>
+        </div>
+        <button onclick="closeEvalModal()" class="text-slate-400 hover:text-white p-1 rounded">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Thân Modal -->
+      <div class="py-4 space-y-4">
+        <!-- Điểm biến động -->
+        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-lg border border-slate-800">
+          <span class="text-xs font-mono text-slate-400">Tác Động Chỉ Số KPI:</span>
+          <span id="modal-score-impact" class="text-sm font-mono font-bold text-emerald-400">+100 ĐIỂM / +5% UY TÍN</span>
+        </div>
+
+        <!-- Nhận xét chi tiết -->
+        <div>
+          <h4 class="text-xs font-mono font-semibold text-slate-300 uppercase mb-1">Nhận Xét Quy Trình:</h4>
+          <p id="modal-feedback-text" class="text-xs md:text-sm text-slate-300 leading-relaxed bg-slate-900/60 p-3 rounded border border-slate-800">
+            <!-- Feedback -->
+          </p>
+        </div>
+
+        <!-- So sánh hành động -->
+        <div class="space-y-1.5 text-xs font-mono">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Hành Động Của Đồng Chí:</span>
+            <span id="modal-user-actions" class="text-slate-200 font-semibold truncate max-w-[240px]">-</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-slate-400">Hành Động Chuẩn Theo SOP:</span>
+            <span id="modal-expected-actions" class="text-amber-400 font-semibold truncate max-w-[240px]">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chân Modal -->
+      <div class="pt-3 border-t border-slate-800 flex justify-end space-x-2">
+        <button onclick="closeEvalModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono rounded transition">
+          Đóng
+        </button>
+        <button id="modal-next-btn" onclick="goToNextTicket()" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-slate-950 font-bold text-xs font-mono rounded transition">
+          Xử Lý Phiếu Tiếp Theo &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION POPUP -->
+  <div id="toast" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 border border-slate-700 text-slate-100 text-xs font-mono px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 pointer-events-none">
+    <i data-lucide="info" class="w-4 h-4 text-sky-400" id="toast-icon"></i>
+    <span id="toast-msg">Thông báo hệ thống</span>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- JAVASCRIPT STATE ENGINE & CORE LOGIC                    -->
+  <!-- ======================================================== -->
+  <script>
+    /* =======================================================
+       1. GLOBAL STATE & BỘ DỮ LIỆU TICKET T48 CHUẨN
+       ======================================================= */
+    const STATE = {
+      score: 0,
+      reputation: 100,
+      resolvedCount: 0,
+      totalCount: 3,
+      slaViolations: 0,
+      audioEnabled: true,
+      currentFilter: 'all',
+      activeTab: 'detail',
+      activeTicketId: 'T48-MAC-01',
+      
+      // Bản đồ định danh hành động
+      actionMap: {
+        'whitelist_mac': 'Duyệt Whitelist MAC',
+        'blacklist_mac': 'Cho vào Blacklist / Chặn MAC',
+        'isolate_port': 'Cách Ly Cổng / Switch Mạng',
+        'reset_account': 'Khóa Tài Khoản / Reset Pass',
+        'block_ip': 'Chặn IP Độc Hại Trên Firewall',
+        'broadcast_notice': 'Soạn & Phát Thông Báo Toàn Trường',
+        'escalate_superior': 'Báo Cáo Ban Giám Đốc / Cấp Trên'
+      },
+
+      // Cơ sở dữ liệu Ticket mẫu (Học viện An ninh Nhân dân)
+      tickets: [
+        {
+          id: 'T48-MAC-01',
+          type: 'mac', // 'mac' | 'security' | 'notice'
+          typeName: 'Đăng Ký MAC',
+          title: 'Đăng ký địa chỉ MAC Laptop học viên truy cập Wi-Fi Thư viện',
+          sender: 'Nguyễn Trung Kiên (Mã HV: 550123)',
+          unit: 'Lớp B1D55 - Chuyên ngành An ninh mạng',
+          severity: 'Thấp',
+          mac: '3C:06:30:11:22:33',
+          location: 'VLAN 10 - Tầng 2 Thư viện T48',
+          status: 'Open',
+          slaRemainingSeconds: 720, // 12 phút
+          slaInitialSeconds: 720,
+          description: 'Học viên Nguyễn Trung Kiên (Lớp B1D55) gửi phiếu đăng ký hợp lệ qua Cổng thông tin Học viện đề nghị cấp quyền truy cập mạng Wi-Fi "HV_ANND_LIBRARY" phục vụ nghiên cứu tài liệu số và học tập tại Thư viện. Thiết bị đã được kiểm tra cài đặt phần mềm phòng chống mã độc theo quy định của Học viện.',
+          artifacts: [
+            { label: 'Địa Chỉ MAC', val: '3C:06:30:11:22:33', type: 'mac' },
+            { label: 'Hãng Sản Xuất', val: 'Apple Inc.', type: 'info' },
+            { label: 'Thiết Bị', val: 'MacBook Pro M2 (macOS)', type: 'info' },
+            { label: 'IP Dự Kiến Gán', val: '10.48.10.25 (DHCP Pool)', type: 'ip' }
+          ],
+          sopList: [
+            'Kiểm tra định dạng địa chỉ MAC (6 nhóm hex cách nhau dấu hai chấm).',
+            'Đối chiếu thông tin học viên trên cơ sở dữ liệu đào tạo (Học viên B1D55 còn quyền hạn).',
+            'Thêm địa chỉ MAC vào danh sách cho phép (Whitelist) trên bộ điều khiển mạng Wi-Fi (WLC).',
+            'Lưu nhật ký cấp phát IP-MAC vào máy chủ RADIUS Thư viện.'
+          ],
+          logType: 'RADIUS_REGISTRATION_LOG',
+          rawLogs:
+`2026-10-10 14:10:02 [RADIUS-REQ] User="550123_kiennt" MAC="3C:06:30:11:22:33" SSID="HV_ANND_LIBRARY"
+2026-10-10 14:10:02 [AUTH-CHECK] Student verified: Nguyen Trung Kien, Class=B1D55, Status=Active
+2026-10-10 14:10:03 [POLICY-EVAL] AntiVirus_Installed=YES, OS=macOS_14.5
+2026-10-10 14:10:03 [ACTION-PENDING] Waiting for Network Administrator Approval...
+2026-10-10 14:10:04 [DHCP-RESERVE] Planned IP: 10.48.10.25/24 on Gateway 10.48.10.1`,
+          correct_actions: ['whitelist_mac'],
+          sopExplanation: 'Quy trình xét duyệt truy cập mạng Wi-Fi học tập: Phiếu đăng ký của học viên lớp B1D55 đầy đủ thông tin hợp lệ, thiết bị đạt tiêu chuẩn an toàn thông tin của Học viện. Cán bộ quản trị chỉ cần thực hiện "Duyệt Whitelist MAC" trên hệ thống WLC.'
+        },
+        {
+          id: 'T48-SEC-02',
+          type: 'security',
+          typeName: 'An Ninh Mạng',
+          title: 'Cảnh báo giả mạo địa chỉ MAC (MAC Spoofing) và truy cập trái phép tại KTX',
+          sender: 'Hệ Thống IDS / Core Switch T48',
+          unit: 'Khu KTX Nhà D3 (Tầng 3)',
+          severity: 'Cao',
+          mac: '00:50:56:C0:00:08 (Giả mạo)',
+          location: 'Switch-D3-P18 (VLAN 20)',
+          status: 'Open',
+          slaRemainingSeconds: 480, // 8 phút
+          slaInitialSeconds: 480,
+          description: 'Hệ thống giám sát an ninh (IDS) phát hiện xung đột địa chỉ MAC và tấn công giả mạo (MAC Spoofing / ARP Poisoning) phát sinh từ cổng mạng vật lý Port 18 trên Switch Nhà D3. Kẻ xâm nhập sử dụng máy ảo VMware liên tục thay đổi địa chỉ MAC để cố tình vượt mặt danh sách kiểm soát truy cập (Access Control List) và thực hiện dò quét cổng nội bộ nhắm vào dải mạng quản trị của Học viện.',
+          artifacts: [
+            { label: 'MAC Vi Phạm', val: '00:50:56:C0:00:08', type: 'bad_mac' },
+            { label: 'IP Nguồn Vi Phạm', val: '10.48.20.105', type: 'bad_ip' },
+            { label: 'Cổng Switch', val: 'Switch-D3-Port-18', type: 'port' },
+            { label: 'Hành Vi', val: 'ARP Poisoning / Port Scan', type: 'threat' }
+          ],
+          sopList: [
+            'Lập tức đưa địa chỉ MAC vi phạm vào danh sách cấm (Blacklist).',
+            'Kích hoạt Port Security ngắt kết nối mạng tại cổng Switch Nhà D3 (Cách ly cổng mạng).',
+            'Chặn địa chỉ IP vi phạm 10.48.20.105 trên tường lửa nội bộ.',
+            'Báo cáo lãnh đạo Ban Quản trị / Trực ban Học viện để cử cán bộ kiểm tra trực tiếp hiện trường KTX.'
+          ],
+          logType: 'SWITCH_SECURITY_SYSLOG',
+          rawLogs:
+`2026-10-10 15:22:11 %SEC-4-MAC_SPOOF: Port 18 received duplicated MAC 00:50:56:C0:00:08 spoofing IP 10.48.20.105
+2026-10-10 15:22:14 %ARP-3-POISON: Detected ARP Reply with false binding -> 10.48.20.1 is at 00:50:56:C0:00:08
+2026-10-10 15:22:20 %IDS-2-PORTSCAN: Host 10.48.20.105 scanning TCP ports 22, 80, 443, 3389 on Subnet 10.48.1.0/24
+2026-10-10 15:22:25 %PORTSEC-WARN: Host attempted 15 distinct MAC variations in 30 seconds
+2026-10-10 15:22:30 Payload string: powershell -NoP -w hidden -enc Vm0wd2QyUXlVWGxWV0d4V1YwZDRWMVpyWkZkV1JsbDNXa2M1VjFac1du...`,
+          correct_actions: ['blacklist_mac', 'isolate_port', 'block_ip', 'escalate_superior'],
+          sopExplanation: 'Quy trình phản ứng sự cố tấn công mạng nội bộ: Phát hiện hành vi MAC Spoofing và rà quét mạng trái phép nghiêm trọng tại KTX. Cán bộ SOC bắt buộc phải: Đưa MAC vào Blacklist, Cách ly Cổng Switch Nhà D3 ngay lập tức để cắt đứt liên lạc vật lý, Chặn IP trên Firewall và Báo cáo cấp trên để lập biên bản xử lý kỷ luật đối tượng vi phạm.'
+        },
+        {
+          id: 'T48-NOT-03',
+          type: 'notice',
+          typeName: 'Thông Báo Đào Tạo',
+          title: 'Ban Giám đốc chỉ đạo phát thông báo khẩn về bảo mật mật khẩu Cổng thông tin Học viên',
+          sender: 'Đại tá Trần Quốc Huy (Phó Giám đốc Học viện)',
+          unit: 'Ban Giám Đốc & Phòng Quản lý Đào tạo',
+          severity: 'Trung bình',
+          mac: 'Toàn hệ thống (N/A)',
+          location: 'Cổng Thông Tin Học Viên (sinhvien.hvannd.edu.vn)',
+          status: 'Open',
+          slaRemainingSeconds: 600, // 10 phút
+          slaInitialSeconds: 600,
+          description: 'Ban Giám đốc Học viện ghi nhận tình trạng một số học viên đặt mật khẩu Cổng thông tin quá đơn giản (ngày sinh, 123456) dẫn tới nguy cơ bị kẻ xấu lợi dụng đổi thông tin môn thi và kết quả rèn luyện. Đồng chí Phó Giám đốc chỉ đạo khẩn: Yêu cầu Quản trị hệ thống bắt buộc toàn bộ học viên đổi mật khẩu phức tạp, đồng thời phát thông báo chỉ đạo khẩn cấp toàn trường.',
+          artifacts: [
+            { label: 'Cơ Quan Chỉ Đạo', val: 'Ban Giám Đốc T48', type: 'info' },
+            { label: 'Mục Tiêu', val: 'Cổng Thông Tin Học Viên', type: 'info' },
+            { label: 'Biện Pháp', val: 'Cưỡng Chế Đổi Mật Khẩu (MFA/Reset)', type: 'warning' },
+            { label: 'Phạm Vi', val: 'Toàn Thể Học Viên T48', type: 'info' }
+          ],
+          sopList: [
+            'Kích hoạt chính sách cưỡng chế đặt lại mật khẩu đối với các tài khoản dùng mật khẩu mặc định.',
+            'Soạn thảo và phát thông báo khẩn cấp lên Cổng thông tin sinh viên và Bảng tin toàn trường.',
+            'Gửi báo cáo xác nhận hoàn thành đợt triển khai lên Ban Giám đốc Học viện.'
+          ],
+          logType: 'DIRECTIVE_ADMIN_DISPATCH',
+          rawLogs:
+`2026-10-10 16:00:00 [BGĐ-CHIDAO] So_van_ban: 842/TB-T48-BGD
+2026-10-10 16:00:05 [NOI_DUNG] Khan: Yeu cau toan the hoc vien thuc hien doi mat khau cap 2 tren Cong Thong Tin.
+2026-10-10 16:00:10 [QUY_DINH] Do dai toi thieu 10 ky tu gom chu hoa, chu thuong, chu so va ky tu dac biet.
+2026-10-10 16:00:15 [THI_HANH] Yeu cau Trung tam CNTT khoa tam thoi cac tai khoan chua cap nhat truoc ngay 15/10.`,
+          correct_actions: ['reset_account', 'broadcast_notice', 'escalate_superior'],
+          sopExplanation: 'Quy trình thực hiện chỉ đạo quản trị & an toàn thông tin: Cán bộ cần thực hiện các hành động: Khóa tạm thời / Kích hoạt Reset mật khẩu cho các tài khoản học viên, Sử dụng công cụ Phát thông báo toàn trường để thông báo cho toàn thể học viên các khóa, và Báo cáo Ban Giám đốc kết quả thực hiện.'
+        }
+      ]
+    };
+
+    /* Cơ sở dữ liệu tra cứu OUI Nhà sản xuất MAC */
+    const OUI_DATABASE = {
+      '3C:06:30': { vendor: 'Apple, Inc.', deviceType: 'Laptop / iPhone / iPad', status: 'Hợp chuẩn giáo dục' },
+      '00:50:56': { vendor: 'VMware, Inc.', deviceType: 'Virtual Machine NIC (Máy ảo)', status: 'Nghi vấn giả mạo MAC' },
+      'E4:AA:5D': { vendor: 'Cisco Systems', deviceType: 'Enterprise Switch / Router', status: 'Hạ tầng quản trị mạng' },
+      'A4:83:E7': { vendor: 'Dell Inc.', deviceType: 'Laptop Dell Latitude / XPS', status: 'Hợp chuẩn giáo dục' },
+      '08:00:27': { vendor: 'PCS Systemtechnik (VirtualBox)', deviceType: 'Virtual NIC', status: 'Nghi vấn máy ảo' }
+    };
+
+    /* =======================================================
+       2. KHỞI TẠO HỆ THỐNG & ĐỒNG HỒ SLA
+       ======================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderTicketList();
+      loadTicketDetails(STATE.activeTicketId);
+      updateScoreboard();
+      startClocks();
+    });
+
+    function startClocks() {
+      setInterval(() => {
+        // Đồng hồ thời gian thực giờ Hà Nội (ICT)
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('vi-VN', { hour12: false }) + ' ICT';
+        const clockEl = document.getElementById('live-clock');
+        if (clockEl) clockEl.textContent = timeStr;
+
+        // Đếm ngược SLA từng Ticket
+        let activeTicket = getActiveTicket();
+        STATE.tickets.forEach(ticket => {
+          if (ticket.status === 'Open' && ticket.slaRemainingSeconds > 0) {
+            ticket.slaRemainingSeconds--;
+            if (ticket.slaRemainingSeconds === 0) {
+              handleSlaBreach(ticket);
+            }
+          }
+        });
+
+        // Hiển thị SLA Ticket đang xem
+        if (activeTicket) {
+          const slaEl = document.getElementById('detail-sla-countdown');
+          if (slaEl) {
+            if (activeTicket.status === 'Resolved') {
+              slaEl.textContent = 'ĐÃ HOÀN THÀNH (Đóng)';
+              slaEl.className = 'text-emerald-400 font-bold';
+            } else if (activeTicket.slaRemainingSeconds <= 0) {
+              slaEl.textContent = 'QUÁ HẠN (00m 00s)';
+              slaEl.className = 'text-rose-400 font-bold animate-pulse';
+            } else {
+              slaEl.textContent = formatTimer(activeTicket.slaRemainingSeconds);
+              slaEl.className = activeTicket.slaRemainingSeconds < 180 ? 'text-rose-400 font-bold animate-pulse' : 'text-amber-300 font-bold';
+            }
+          }
+        }
+
+        // Cập nhật nhãn đếm ngược trên danh sách
+        updateListTimers();
+
+      }, 1000);
+    }
+
+    function formatTimer(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+    }
+
+    function handleSlaBreach(ticket) {
+      playTone(220, 350);
+      showToast(`⚠️ QUÁ HẠN SLA PHIẾU [${ticket.id}]! Điểm uy tín bị trừ.`, 'warning');
+      STATE.reputation = Math.max(0, STATE.reputation - 15);
+      STATE.slaViolations++;
+      updateScoreboard();
+      renderTicketList();
+    }
+
+    /* =======================================================
+       3. HIỂN THỊ DANH SÁCH TICKET & BỘ LỌC
+       ======================================================= */
+    function getActiveTicket() {
+      return STATE.tickets.find(t => t.id === STATE.activeTicketId);
+    }
+
+    function setFilter(filterType) {
+      STATE.currentFilter = filterType;
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.className = 'filter-tab py-1.5 rounded font-medium text-center transition hover:bg-slate-800 text-slate-400 border border-transparent';
+      });
+      const activeBtn = document.getElementById(`tab-filter-${filterType}`);
+      if (activeBtn) {
+        activeBtn.className = 'filter-tab py-1.5 rounded font-medium text-center transition bg-sky-600/20 text-sky-300 border border-sky-500/40';
+      }
+      renderTicketList();
+    }
+
+    function renderTicketList() {
+      const container = document.getElementById('ticket-list');
+      const searchVal = document.getElementById('ticket-search').value.toLowerCase().trim();
+
+      const filtered = STATE.tickets.filter(t => {
+        // Lọc theo loại
+        if (STATE.currentFilter === 'security' && t.type !== 'security') return false;
+        if (STATE.currentFilter === 'mac' && t.type !== 'mac') return false;
+        if (STATE.currentFilter === 'notice' && t.type !== 'notice') return false;
+
+        // Lọc theo tìm kiếm
+        if (searchVal) {
+          const matchTitle = t.title.toLowerCase().includes(searchVal);
+          const matchSender = t.sender.toLowerCase().includes(searchVal);
+          const matchUnit = t.unit.toLowerCase().includes(searchVal);
+          const matchId = t.id.toLowerCase().includes(searchVal);
+          const matchMac = t.mac.toLowerCase().includes(searchVal);
+          if (!matchTitle && !matchSender && !matchUnit && !matchId && !matchMac) return false;
+        }
+        return true;
+      });
+
+      const openCount = STATE.tickets.filter(t => t.status === 'Open').length;
+      document.getElementById('queue-badge').textContent = `${openCount} Chờ Xử Lý`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 text-slate-500 font-mono text-xs">
+            <i data-lucide="filter-x" class="w-6 h-6 mx-auto mb-2 text-slate-600"></i>
+            Không có phiếu nào phù hợp bộ lọc.
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = filtered.map(t => {
+        const isActive = t.id === STATE.activeTicketId;
+        const isResolved = t.status === 'Resolved';
+        
+        let sevClass = 'bg-blue-950 text-blue-400 border-blue-500/30';
+        if (t.severity === 'Cao') sevClass = 'bg-rose-950 text-rose-400 border-rose-500/50 glow-red font-bold';
+        if (t.severity === 'Trung bình') sevClass = 'bg-amber-950 text-amber-400 border-amber-500/40 glow-amber';
+        if (t.severity === 'Thấp') sevClass = 'bg-emerald-950 text-emerald-400 border-emerald-500/40';
+
+        const activeBorder = isActive 
+          ? 'bg-slate-800/90 border-sky-500 shadow-lg shadow-sky-950/40' 
+          : 'bg-slate-900/60 border-slate-800 hover:bg-slate-800/50 hover:border-slate-700';
+
+        return `
+          <div onclick="selectTicket('${t.id}')" 
+               class="p-2.5 rounded-lg border ${activeBorder} cursor-pointer transition relative group select-none">
+            
+            <div class="flex items-start justify-between gap-1 mb-1">
+              <div class="flex items-center space-x-1.5">
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded border ${sevClass}">${t.severity}</span>
+                <span class="text-[11px] font-mono font-bold text-slate-300 group-hover:text-sky-400 transition">${t.id}</span>
+              </div>
+              
+              <div class="text-[10px] font-mono flex items-center space-x-1" id="timer-badge-${t.id}">
+                ${isResolved 
+                  ? `<span class="text-emerald-400 font-semibold flex items-center"><i data-lucide="check" class="w-3 h-3 mr-0.5"></i> ĐÃ XỬ LÝ</span>`
+                  : `<i data-lucide="clock" class="w-3 h-3 text-amber-400"></i><span class="${t.slaRemainingSeconds < 180 ? 'text-rose-400 font-bold' : 'text-slate-400'}">${formatTimer(t.slaRemainingSeconds)}</span>`
+                }
+              </div>
+            </div>
+
+            <div class="font-medium text-xs text-slate-200 line-clamp-1 group-hover:text-white">${t.title}</div>
+            
+            <div class="mt-2 flex items-center justify-between text-[10px] font-mono text-slate-400">
+              <span class="truncate max-w-[150px]"><i data-lucide="user" class="w-2.5 h-2.5 inline mr-1 text-slate-500"></i>${t.unit}</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-bold ${isResolved ? 'bg-emerald-950 text-emerald-400' : 'bg-slate-800 text-amber-400'}">${isResolved ? 'Hoàn thành' : 'Chờ xử lý'}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function updateListTimers() {
+      STATE.tickets.forEach(t => {
+        const badge = document.getElementById(`timer-badge-${t.id}`);
+        if (badge && t.status === 'Open') {
+          badge.innerHTML = `<i data-lucide="clock" class="w-3 h-3 text-amber-400"></i><span class="${t.slaRemainingSeconds < 180 ? 'text-rose-400 font-bold' : 'text-slate-400'}">${formatTimer(t.slaRemainingSeconds)}</span>`;
+        }
+      });
+    }
+
+    function selectTicket(ticketId) {
+      STATE.activeTicketId = ticketId;
+      renderTicketList();
+      loadTicketDetails(ticketId);
+      clearCheckedActions();
+      playTone(550, 70);
+    }
+
+    /* =======================================================
+       4. NẠP DỮ LIỆU CHI TIẾT TICKET VÀO WORKSPACE
+       ======================================================= */
+    function loadTicketDetails(ticketId) {
+      const ticket = STATE.tickets.find(t => t.id === ticketId);
+      if (!ticket) return;
+
+      document.getElementById('lbl-active-ticket-id').textContent = `#${ticket.id}`;
+      document.getElementById('detail-title').textContent = ticket.title;
+      document.getElementById('detail-desc').textContent = ticket.description;
+      document.getElementById('detail-sender').textContent = ticket.sender;
+      document.getElementById('detail-unit').textContent = ticket.unit;
+      document.getElementById('detail-mac').textContent = ticket.mac;
+      document.getElementById('detail-location').textContent = ticket.location;
+      document.getElementById('detail-type-badge').textContent = ticket.typeName;
+
+      // Severity badge styling
+      const sevBadge = document.getElementById('detail-sev-badge');
+      sevBadge.textContent = `MỨC ĐỘ: ${ticket.severity.toUpperCase()}`;
+      if (ticket.severity === 'Cao') {
+        sevBadge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase bg-rose-950 text-rose-400 border border-rose-500/50 glow-red';
+      } else if (ticket.severity === 'Trung bình') {
+        sevBadge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase bg-amber-950 text-amber-400 border border-amber-500/50 glow-amber';
+      } else {
+        sevBadge.className = 'px-2.5 py-0.5 rounded text-xs font-mono font-bold uppercase bg-emerald-950 text-emerald-400 border border-emerald-500/50';
+      }
+
+      // Render Artifacts
+      const artContainer = document.getElementById('detail-artifacts');
+      artContainer.innerHTML = ticket.artifacts.map(art => {
+        let color = 'bg-slate-800 text-slate-300 border-slate-700';
+        if (art.type === 'bad_mac' || art.type === 'bad_ip' || art.type === 'threat') {
+          color = 'bg-rose-950 text-rose-300 border-rose-600/50';
+        } else if (art.type === 'mac') {
+          color = 'bg-purple-950 text-purple-300 border-purple-600/50';
+        } else if (art.type === 'ip') {
+          color = 'bg-sky-950 text-sky-300 border-sky-600/50';
+        } else if (art.type === 'warning') {
+          color = 'bg-amber-950 text-amber-300 border-amber-600/50';
+        }
+        return `
+          <div class="px-2.5 py-1 rounded text-xs font-mono border flex items-center space-x-1.5 ${color}">
+            <span class="text-slate-400 text-[10px] uppercase">${art.label}:</span>
+            <span class="font-bold">${art.val}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Render SOP Checklist
+      const sopList = document.getElementById('detail-sop-list');
+      sopList.innerHTML = ticket.sopList.map(step => `<li>${step}</li>`).join('');
+
+      // Render Logs
+      document.getElementById('log-format-title').textContent = ticket.logType;
+      document.getElementById('log-file-name').textContent = `${ticket.id.toLowerCase()}_evidence.log`;
+      document.getElementById('log-code-viewer').innerHTML = syntaxHighlightLogs(ticket.rawLogs);
+
+      // Reset Broadcast Previews
+      document.getElementById('bc-preview-box').classList.add('hidden');
+      document.getElementById('bc-title').value = '';
+      document.getElementById('bc-content').value = '';
+
+      // Tự động gán MAC vào tool tra cứu nếu ticket có MAC
+      if (ticket.mac && ticket.mac !== 'Toàn hệ thống (N/A)') {
+        const cleanMac = ticket.mac.split(' ')[0];
+        document.getElementById('mac-search-input').value = cleanMac;
+        renderMacLookup(cleanMac);
+      }
+
+      lucide.createIcons();
+    }
+
+    /* Tô màu cú pháp log pháp y T48 */
+    function syntaxHighlightLogs(raw) {
+      if (!raw) return '';
+      let esc = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      // Cảnh báo nguy hiểm / Dấu vết vi phạm
+      esc = esc.replace(/\b(MAC_SPOOF|POISON|PORTSCAN|WARN|DANG_NHAP_LOI|fail|False binding)\b/gi, '<span class="hl-danger">$1</span>');
+
+      // Địa chỉ MAC (ví dụ: 00:50:56:C0:00:08 hoặc 3C:06:30:11:22:33)
+      esc = esc.replace(/\b([0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2})\b/g, '<span class="hl-mac">$1</span>');
+
+      // Địa chỉ IPv4
+      esc = esc.replace(/\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b/g, '<span class="hl-ip">$1</span>');
+
+      // Lệnh thực thi powershell / scripts
+      esc = esc.replace(/\b(powershell|Invoke-WebRequest|DHCP-RESERVE|RADIUS-REQ|BGĐ-CHIDAO)\b/gi, '<span class="hl-cmd">$1</span>');
+
+      return esc;
+    }
+
+    /* =======================================================
+       5. CHUYỂN TAB CÔNG CỤ & CÁC TIỆN ÍCH QUẢN TRỊ
+       ======================================================= */
+    function switchTab(tabId) {
+      STATE.activeTab = tabId;
+      document.querySelectorAll('.ws-tab').forEach(b => {
+        b.className = 'ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 text-slate-400 hover:bg-slate-800/60 border border-transparent';
+      });
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = 'ws-tab px-3 py-1.5 text-xs font-mono font-medium rounded-lg transition flex items-center space-x-1.5 bg-slate-800 text-sky-300 border border-sky-500/40';
+      }
+
+      const panes = ['detail', 'maclookup', 'logs', 'broadcast', 'decoder'];
+      panes.forEach(p => {
+        const el = document.getElementById(`pane-${p}`);
+        if (el) {
+          if (p === tabId) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
+      });
+      lucide.createIcons();
+    }
+
+    /* Tra cứu MAC/OUI */
+    function lookupMACAction() {
+      const input = document.getElementById('mac-search-input').value.trim();
+      if (!input) {
+        showToast('Vui lòng nhập địa chỉ MAC cần tra cứu.', 'warning');
+        return;
+      }
+      playTone(600, 100);
+      renderMacLookup(input);
+    }
+
+    function renderMacLookup(macInput) {
+      const card = document.getElementById('mac-result-card');
+      const cleanPrefix = macInput.substring(0, 8).toUpperCase();
+      const record = OUI_DATABASE[cleanPrefix];
+
+      if (record) {
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div>
+              <span class="text-[10px] text-slate-400">ĐỊA CHỈ MAC ĐỐI SOÁT:</span>
+              <div class="text-sm font-bold text-sky-400 font-mono">${macInput}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${cleanPrefix === '00:50:56' ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'}">
+              ${record.status}
+            </span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+            <div>
+              <span class="text-slate-500 text-[10px]">HÃNG SẢN XUẤT (VENDOR):</span>
+              <div class="font-bold text-slate-200">${record.vendor}</div>
+            </div>
+            <div>
+              <span class="text-slate-500 text-[10px]">LOẠI THIẾT BỊ PHÂN TÍCH:</span>
+              <div class="font-bold text-amber-300">${record.deviceType}</div>
+            </div>
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="text-center py-3 text-slate-400">
+            <div class="font-bold text-slate-300 mb-1">Địa chỉ MAC: "${macInput}"</div>
+            <p class="text-[11px] text-slate-500">Chưa có thông tin định danh chính xác OUI trong CSDL T48 nội bộ (Có thể là MAC ngẫu nhiên do tính năng MAC Randomization trên điện thoại/máy tính).</p>
+          </div>
+        `;
+      }
+    }
+
+    function fillCurrentTicketMAC() {
+      const ticket = getActiveTicket();
+      if (ticket.mac && ticket.mac !== 'Toàn hệ thống (N/A)') {
+        const cleanMac = ticket.mac.split(' ')[0];
+        document.getElementById('mac-search-input').value = cleanMac;
+        renderMacLookup(cleanMac);
+        showToast(`Đã lấy MAC từ phiếu ${ticket.id}`, 'info');
+      } else {
+        showToast('Phiếu này không chứa địa chỉ MAC cụ thể.', 'warning');
+      }
+    }
+
+    function copyCurrentLog() {
+      const ticket = getActiveTicket();
+      if (!ticket) return;
+      navigator.clipboard.writeText(ticket.rawLogs).then(() => {
+        showToast('Đã sao chép nhật ký dấu vết vào bộ nhớ tạm!', 'success');
+      });
+    }
+
+    /* Công cụ Phát thông báo toàn trường */
+    function loadTemplateBroadcast() {
+      const ticket = getActiveTicket();
+      if (ticket.type === 'notice') {
+        document.getElementById('bc-title').value = 'KHẨN: YÊU CẦU ĐỔI MẬT KHẨU CỔNG THÔNG TIN HỌC VIÊN T48';
+        document.getElementById('bc-content').value = 'Căn cứ chỉ đạo của Ban Giám đốc Học viện, toàn thể học viên các khóa khẩn trương cập nhật mật khẩu Cổng thông tin (tối thiểu 10 ký tự, có ký tự đặc biệt) để đảm bảo an toàn điểm thi và dữ liệu rèn luyện. Các tài khoản không cập nhật sẽ bị tạm khóa sau 24h.';
+        showToast('Đã nạp nội dung mẫu từ chỉ đạo của Ban Giám đốc!', 'info');
+      } else {
+        document.getElementById('bc-title').value = `THÔNG BÁO VỀ SỰ CỐ ${ticket.id}`;
+        document.getElementById('bc-content').value = `Ban Quản trị Mạng Học viện thông báo xử lý kỹ thuật tại khu vực ${ticket.location}. Yêu cầu các học viên phối hợp chấp hành quy định.`;
+        showToast('Đã tạo nội dung thông báo dựa trên phiếu hiện tại!', 'info');
+      }
+    }
+
+    function dispatchBroadcast() {
+      const title = document.getElementById('bc-title').value.trim();
+      const body = document.getElementById('bc-content').value.trim();
+      if (!title || !body) {
+        showToast('Vui lòng nhập đầy đủ Tiêu đề và Nội dung thông báo.', 'warning');
+        return;
+      }
+      playTone(750, 150);
+      document.getElementById('prev-bc-title').textContent = title;
+      document.getElementById('prev-bc-body').textContent = body;
+      document.getElementById('bc-preview-box').classList.remove('hidden');
+      showToast('Đã phát thông báo khẩn cấp tới toàn thể Học viện thành công!', 'success');
+    }
+
+    /* Công cụ giải mã dấu vết & Hash */
+    function decodeBase64() {
+      const input = document.getElementById('decoder-input').value.trim();
+      const output = document.getElementById('decoder-output');
+      if (!input) {
+        showToast('Vui lòng nhập chuỗi Base64 cần giải mã.', 'warning');
+        return;
+      }
+      try {
+        output.textContent = atob(input);
+        playTone(850, 80);
+      } catch (e) {
+        output.textContent = `[LỖI GIẢI MÃ]: Chuỗi Base64 không hợp lệ (${e.message})`;
+      }
+    }
+
+    function decodeHex() {
+      const input = document.getElementById('decoder-input').value.trim().replace(/^0x/i, '').replace(/\s+/g, '');
+      const output = document.getElementById('decoder-output');
+      if (!input) return;
+      try {
+        let str = '';
+        for (let i = 0; i < input.length; i += 2) {
+          str += String.fromCharCode(parseInt(input.substr(i, 2), 16));
+        }
+        output.textContent = str || '[KẾT QUẢ RỖNG]';
+        playTone(850, 80);
+      } catch (e) {
+        output.textContent = `[LỖI HEX]: Ký tự hex không hợp lệ.`;
+      }
+    }
+
+    async function calculateSimpleHash() {
+      const input = document.getElementById('decoder-input').value.trim();
+      const output = document.getElementById('decoder-output');
+      if (!input) return;
+      try {
+        const msgUint8 = new TextEncoder().encode(input);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        output.textContent = `SHA-256 CHECKSUM:\n${hashHex}`;
+        playTone(850, 80);
+      } catch (e) {
+        output.textContent = `Lỗi băm: ${e.message}`;
+      }
+    }
+
+    function loadTicketSamplePayload() {
+      const ticket = getActiveTicket();
+      if (ticket.id === 'T48-SEC-02') {
+        document.getElementById('decoder-input').value = 'Vm0wd2QyUXlVWGxWV0d4V1YwZDRWMVpyWkZkV1JsbDNXa2M1VjFac1duRlVWV2hYWWxoU1lWVnFTVGs9';
+      } else {
+        document.getElementById('decoder-input').value = 'aHR0cHM6Ly9zaW5odmllbi5odmFubmQuZWR1LnZuL2RvaS1tYXQta2hhdQ==';
+      }
+      showToast('Đã trích xuất chuỗi mã độc/dấu vết từ sự cố đang chọn.', 'info');
+    }
+
+    /* =======================================================
+       6. ĐÁNH GIÁ THỰC THI THEO QUY TRÌNH VẬN HÀNH SOP
+       ======================================================= */
+    function clearCheckedActions() {
+      document.querySelectorAll('.response-checkbox').forEach(cb => cb.checked = false);
+    }
+
+    function handleSubmitResponse() {
+      const ticket = getActiveTicket();
+      if (!ticket) return;
+
+      if (ticket.status === 'Resolved') {
+        showToast('Phiếu sự cố này đã được giải quyết hoàn tất trước đó.', 'info');
+        return;
+      }
+
+      // Thu thập các hành động người dùng tick chọn
+      const checkedBoxes = Array.from(document.querySelectorAll('.response-checkbox:checked'));
+      const selectedActionIds = checkedBoxes.map(cb => cb.value);
+
+      if (selectedActionIds.length === 0) {
+        showToast('Đồng chí vui lòng chọn ít nhất một hành động trong Bảng lệnh.', 'warning');
+        return;
+      }
+
+      const expectedActionIds = ticket.correct_actions;
+
+      // So sánh chính xác hoàn toàn
+      const isExactMatch = 
+        selectedActionIds.length === expectedActionIds.length &&
+        selectedActionIds.every(id => expectedActionIds.includes(id));
+
+      if (isExactMatch) {
+        // Đúng quy trình SOP
+        ticket.status = 'Resolved';
+        STATE.score += 100;
+        STATE.reputation = Math.min(100, STATE.reputation + 5);
+        STATE.resolvedCount++;
+
+        playVictorySound();
+        showToast('Xử lý chuẩn xác theo SOP T48! (+100 Điểm KPI)', 'success');
+        openEvalModal(true, ticket, selectedActionIds, expectedActionIds);
+      } else {
+        // Sai quy trình
+        STATE.score = Math.max(0, STATE.score - 50);
+        STATE.reputation = Math.max(0, STATE.reputation - 10);
+
+        playDefeatSound();
+        showToast('Sai quy trình nghiệp vụ tiêu chuẩn! (-50 Điểm KPI)', 'error');
+        openEvalModal(false, ticket, selectedActionIds, expectedActionIds);
+      }
+
+      updateScoreboard();
+      renderTicketList();
+    }
+
+    function openEvalModal(isSuccess, ticket, userActions, expectedActions) {
+      const modal = document.getElementById('eval-modal');
+      const iconWrap = document.getElementById('modal-icon-wrapper');
+      const headline = document.getElementById('modal-headline');
+      const scoreImpact = document.getElementById('modal-score-impact');
+      const feedbackText = document.getElementById('modal-feedback-text');
+      const userActsEl = document.getElementById('modal-user-actions');
+      const expActsEl = document.getElementById('modal-expected-actions');
+      const nextBtn = document.getElementById('modal-next-btn');
+
+      const userLabels = userActions.map(id => STATE.actionMap[id] || id).join(', ');
+      const expLabels = expectedActions.map(id => STATE.actionMap[id] || id).join(', ');
+
+      userActsEl.textContent = userLabels;
+      expActsEl.textContent = expLabels;
+
+      if (isSuccess) {
+        iconWrap.className = 'w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-950 border border-emerald-500/50 text-emerald-400';
+        iconWrap.innerHTML = '<i data-lucide="shield-check" class="w-6 h-6"></i>';
+        headline.textContent = 'Hoàn Thành Chuẩn Xác Quy Trình SOP T48';
+        headline.className = 'text-base font-bold uppercase tracking-wide text-emerald-400';
+        scoreImpact.className = 'text-sm font-mono font-bold text-emerald-400';
+        scoreImpact.textContent = '+100 ĐIỂM KPI / +5% UY TÍN TÁC CHIẾN';
+        feedbackText.innerHTML = `<span class="text-emerald-400 font-bold block mb-1">Khen thưởng nghiệp vụ:</span> ${ticket.sopExplanation}`;
+        nextBtn.classList.remove('hidden');
+      } else {
+        iconWrap.className = 'w-10 h-10 rounded-lg flex items-center justify-center bg-rose-950 border border-rose-500/50 text-rose-400';
+        iconWrap.innerHTML = '<i data-lucide="alert-triangle" class="w-6 h-6"></i>';
+        headline.textContent = 'Không Đúng Quy Trình Vận Hành Tiêu Chuẩn';
+        headline.className = 'text-base font-bold uppercase tracking-wide text-rose-400';
+        scoreImpact.className = 'text-sm font-mono font-bold text-rose-400';
+        scoreImpact.textContent = '-50 ĐIỂM KPI / -10% UY TÍN TÁC CHIẾN';
+
+        const missing = expectedActions.filter(id => !userActions.includes(id)).map(id => STATE.actionMap[id]);
+        const unnecessary = userActions.filter(id => !expectedActions.includes(id)).map(id => STATE.actionMap[id]);
+
+        let critique = `<span class="text-rose-400 font-bold block mb-1">Rút kinh nghiệm quy trình:</span>`;
+        if (missing.length > 0) {
+          critique += `<div class="mb-1 text-slate-300"><strong class="text-amber-400">Thiếu bước bắt buộc:</strong> ${missing.join('; ')}.</div>`;
+        }
+        if (unnecessary.length > 0) {
+          critique += `<div class="mb-1 text-slate-300"><strong class="text-rose-400">Thao tác dư thừa / Vượt thẩm quyền:</strong> ${unnecessary.join('; ')}.</div>`;
+        }
+        critique += `<div class="mt-2 text-slate-400 text-xs italic">${ticket.sopExplanation}</div>`;
+        feedbackText.innerHTML = critique;
+        nextBtn.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeEvalModal() {
+      document.getElementById('eval-modal').classList.add('hidden');
+    }
+
+    function goToNextTicket() {
+      closeEvalModal();
+      const openTickets = STATE.tickets.filter(t => t.status === 'Open');
+      if (openTickets.length > 0) {
+        selectTicket(openTickets[0].id);
+      } else {
+        showToast('Xuất sắc! Đồng chí đã xử lý toàn bộ các phiếu trong ca trực!', 'success');
+      }
+    }
+
+    function updateScoreboard() {
+      document.getElementById('stat-score').textContent = STATE.score;
+      document.getElementById('stat-reputation').textContent = `${STATE.reputation}%`;
+      document.getElementById('stat-resolved').textContent = `${STATE.resolvedCount} / ${STATE.totalCount}`;
+
+      const totalEvaluated = STATE.resolvedCount + STATE.slaViolations;
+      let slaRate = '100%';
+      if (totalEvaluated > 0) {
+        const rate = Math.round((STATE.resolvedCount / totalEvaluated) * 100);
+        slaRate = `${rate}%`;
+      }
+      document.getElementById('stat-sla-rate').textContent = slaRate;
+
+      // Cấp bậc khen thưởng KPI
+      const rankBadge = document.getElementById('kpi-rank-badge');
+      if (STATE.score >= 300) {
+        rankBadge.textContent = 'Trưởng Ca Trực SOC T48';
+        rankBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/50 font-bold';
+      } else if (STATE.score >= 200) {
+        rankBadge.textContent = 'Chuyên Viên Quản Trị Cấp 2';
+        rankBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/40 font-bold';
+      } else if (STATE.score >= 100) {
+        rankBadge.textContent = 'Cán Bộ Trực Ban Tác Chiến';
+        rankBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-500/40 font-bold';
+      } else {
+        rankBadge.textContent = 'Cán Bộ Trực Ban';
+        rankBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 font-bold';
+      }
+    }
+
+    /* Thêm Ticket mô phỏng diễn tập */
+    function simulateNewTicket() {
+      const newId = `T48-MAC-${10 + Math.floor(Math.random() * 89)}`;
+      const simTicket = {
+        id: newId,
+        type: 'mac',
+        typeName: 'Đăng Ký MAC',
+        title: 'Học viên lớp B2D56 đăng ký MAC điện thoại kết nối mạng KTX',
+        sender: 'Lê Hoàng Long (HV B2D56)',
+        unit: 'Lớp B2D56 - KTX Nhà D1',
+        severity: 'Thấp',
+        mac: 'A4:83:E7:55:66:77',
+        location: 'VLAN 20 - KTX Nhà D1',
+        status: 'Open',
+        slaRemainingSeconds: 500,
+        slaInitialSeconds: 500,
+        description: 'Học viên Lê Hoàng Long đăng ký thiết bị học tập cá nhân truy cập Wi-Fi nội bộ KTX. Đơn đăng ký kèm chữ ký xác nhận của Ban chỉ huy chi đoàn lớp.',
+        artifacts: [
+          { label: 'Địa Chỉ MAC', val: 'A4:83:E7:55:66:77', type: 'mac' },
+          { label: 'Hãng', val: 'Dell Inc.', type: 'info' }
+        ],
+        sopList: [
+          'Kiểm tra định dạng MAC và tư cách học viên hợp lệ.',
+          'Duyệt cấp quyền Whitelist MAC trên hệ thống.'
+        ],
+        logType: 'RADIUS_LOG',
+        rawLogs: `2026-10-10 16:30:10 [RADIUS] User="560241_longlh" MAC="A4:83:E7:55:66:77" Status=Pending`,
+        correct_actions: ['whitelist_mac'],
+        sopExplanation: 'Đăng ký MAC thông thường hợp lệ: Cán bộ thực hiện "Duyệt Whitelist MAC" để hoàn thành nhiệm vụ.'
+      };
+
+      STATE.tickets.unshift(simTicket);
+      STATE.totalCount++;
+      selectTicket(newId);
+      showToast(`🔥 TIẾP NHẬN PHIẾU YÊU CẦU MỚI: ${newId}`, 'info');
+      playTone(700, 200);
+    }
+
+    function resetSimulator() {
+      if (!confirm('Khởi động lại toàn bộ hệ thống mô phỏng T48 Simulator?')) return;
+      location.reload();
+    }
+
+    /* =======================================================
+       7. HIỆU ỨNG ÂM THANH & TOAST THÔNG BÁO
+       ======================================================= */
+    function toggleAudio() {
+      STATE.audioEnabled = !STATE.audioEnabled;
+      const btn = document.getElementById('btn-audio');
+      if (STATE.audioEnabled) {
+        btn.innerHTML = '<i data-lucide="volume-2" class="w-4 h-4 text-amber-400"></i>';
+        showToast('Đã bật âm thanh hiệu ứng.', 'info');
+      } else {
+        btn.innerHTML = '<i data-lucide="volume-x" class="w-4 h-4 text-slate-500"></i>';
+        showToast('Đã tắt âm thanh.', 'info');
+      }
+      lucide.createIcons();
+    }
+
+    function playTone(freq, dur) {
+      if (!STATE.audioEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur / 1000);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur / 1000);
+      } catch (e) {}
+    }
+
+    function playVictorySound() {
+      if (!STATE.audioEnabled) return;
+      playTone(523, 100);
+      setTimeout(() => playTone(659, 100), 100);
+      setTimeout(() => playTone(784, 180), 200);
+    }
+
+    function playDefeatSound() {
+      if (!STATE.audioEnabled) return;
+      playTone(300, 150);
+      setTimeout(() => playTone(220, 220), 150);
+    }
+
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      const msgEl = document.getElementById('toast-msg');
+      const iconEl = document.getElementById('toast-icon');
+
+      msgEl.textContent = msg;
+
+      if (type === 'success') {
+        toast.className = 'fixed bottom-4 right-4 z-50 transition-all duration-300 bg-emerald-950 border border-emerald-500/80 text-emerald-100 text-xs font-mono px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 pointer-events-none translate-y-0 opacity-100';
+        iconEl.setAttribute('data-lucide', 'check-circle');
+      } else if (type === 'error' || type === 'warning') {
+        toast.className = 'fixed bottom-4 right-4 z-50 transition-all duration-300 bg-rose-950 border border-rose-500/80 text-rose-100 text-xs font-mono px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 pointer-events-none translate-y-0 opacity-100';
+        iconEl.setAttribute('data-lucide', 'alert-octagon');
+      } else {
+        toast.className = 'fixed bottom-4 right-4 z-50 transition-all duration-300 bg-slate-900 border border-sky-500/60 text-slate-100 text-xs font-mono px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 pointer-events-none translate-y-0 opacity-100';
+        iconEl.setAttribute('data-lucide', 'info');
+      }
+
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>

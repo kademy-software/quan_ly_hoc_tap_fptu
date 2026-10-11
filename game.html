@@ -1,0 +1,1960 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOC & Academy Admin Desk - T48 Simulator | Học viện An ninh Nhân dân</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            t48: {
+              bg: '#0a0f1d',
+              card: '#0f172a',
+              cardHover: '#17233f',
+              border: '#1e293b',
+              accent: '#10b981',
+              warning: '#f59e0b',
+              danger: '#ef4444',
+              info: '#38bdf8',
+              gold: '#eab308'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    
+    .pulse-glow {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+    .pulse-glow-danger {
+      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    }
+    .crt-grid {
+      background-size: 30px 30px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .highlight-malicious {
+      background-color: rgba(239, 68, 68, 0.25);
+      color: #f87171;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .highlight-warning {
+      background-color: rgba(245, 158, 11, 0.25);
+      color: #fbbf24;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .highlight-mac {
+      background-color: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+  .evi-line{cursor:pointer;padding:1px 4px;border-radius:3px;border-left:2px solid transparent}
+    .evi-line:hover{background:rgba(251,191,36,.1)}
+    .evi-sel{background:rgba(251,191,36,.2);border-left-color:#fbbf24}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+    .chibi-bob{animation:bob 1.4s ease-in-out infinite}
+    .sup-in{width:100%;background:#020617;border:1px solid #334155;border-radius:6px;padding:3px 6px;font-size:11px;color:#e2e8f0}
+    .sup-in:focus{outline:none;border-color:#f472b6}
+  </style>
+</head>
+<body class="bg-[#070b14] text-slate-200 min-h-screen flex flex-col font-sans select-none crt-grid">
+
+  <!-- TOP HEADER / NAV BAR -->
+  <header class="border-b border-slate-800 bg-[#0c1324]/90 backdrop-blur sticky top-0 z-40 px-4 py-2.5 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-black text-xl border border-emerald-400/40">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-extrabold text-sm md:text-base tracking-wider bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400 bg-clip-text text-transparent uppercase">
+            SOC & Academy Admin Desk
+          </span>
+          <span class="bg-red-500/20 text-red-400 border border-red-500/30 text-[10px] font-mono px-2 py-0.5 rounded-full uppercase tracking-widest font-bold animate-pulse flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> T48 SIMULATOR
+          </span>
+        </div>
+        <div class="text-[11px] text-slate-400 font-medium flex items-center gap-2">
+          <span>Học viện An ninh Nhân dân - Trung tâm CNTT & Giám sát An toàn Thông tin</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-emerald-400 font-mono text-[10px] flex items-center gap-1">
+            <i class="fa-solid fa-wifi text-[9px]"></i> NAC/RADIUS LIVE
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Status & Operational Badges -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5 sm:gap-3 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-mono">
+        <!-- Week and Day -->
+        <div class="flex items-center gap-1.5 text-amber-400 font-bold bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800/50">
+          <i class="fa-solid fa-calendar-days text-[11px]"></i>
+          <span id="currentWeekDisplay">TUẦN 1</span>
+          <span class="text-slate-500">·</span>
+          <span id="currentDayDisplay">NGÀY 1</span>
+        </div>
+        
+        <!-- Officer Rank -->
+        <div class="hidden sm:flex items-center gap-1.5 text-emerald-300 font-semibold bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
+          <i class="fa-solid fa-medal text-emerald-400 text-[11px]"></i>
+          <span id="officerRankDisplay">Học viên Trực ban</span>
+        </div>
+
+        <div class="hidden md:block h-3 w-[1px] bg-slate-700"></div>
+        <div class="hidden md:flex items-center gap-2">
+          <span class="text-slate-400">DEFCON:</span>
+          <span id="defconStatus" class="text-emerald-400 font-bold">LEVEL 4 - NORMAL</span>
+        </div>
+        <div class="hidden lg:block h-3 w-[1px] bg-slate-700"></div>
+        <div class="hidden lg:flex items-center gap-2 text-slate-300">
+          <i class="fa-regular fa-clock text-emerald-400"></i>
+          <span id="liveClock" class="font-bold">--:--:--</span>
+        </div>
+      </div>
+      
+      <button onclick="toggleAudioPrompt()" id="soundToggleBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 text-xs flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-volume-high text-emerald-400"></i>
+        <span class="hidden sm:inline">Âm thanh</span>
+      </button>
+
+      <button onclick="setupGemini()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-700 text-xs flex items-center gap-1.5 transition"><i class="fa-solid fa-key text-amber-400"></i><span class="hidden sm:inline">Gemini</span></button>
+      <button onclick="startNightShift()" class="bg-indigo-700 hover:bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg border border-indigo-400/40 text-xs flex items-center gap-1.5 transition"><i class="fa-solid fa-moon"></i><span class="hidden sm:inline">Ca đêm hỗn loạn</span></button>
+      <!-- Nút Sang Ngày Mới -->
+      <button onclick="advanceNextDay()" id="btnNextDay" class="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold px-3 py-1.5 rounded-lg border border-amber-400/40 text-xs flex items-center gap-1.5 shadow-lg shadow-amber-950/40 transition">
+        <i class="fa-solid fa-forward-step"></i>
+        <span>Sang ngày mới</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN 3-COLUMN LAYOUT -->
+  <main class="flex-1 p-3 md:p-4 grid grid-cols-12 gap-3 md:gap-4 max-w-[1920px] mx-auto w-full">
+
+    <!-- ==================== CỘT TRÁI (3/12): HỘP THƯ TICKET & AI BUTTON ==================== -->
+    <section class="col-span-12 lg:col-span-3 flex flex-col gap-3 h-[calc(100vh-5.5rem)]">
+      
+      <!-- AI Generator Button -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-3 rounded-xl border border-slate-700/80 shadow-lg">
+        <button id="btnAiGenerate" onclick="generateTicket()" 
+          class="w-full relative group overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-semibold py-2.5 px-3 rounded-lg shadow-md flex items-center justify-center gap-2 text-sm transition-all duration-200 border border-emerald-400/30">
+          <span class="absolute inset-0 w-full h-full bg-white/10 group-hover:bg-white/20 transition-opacity"></span>
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-300 animate-spin-slow"></i>
+          <span>➕ Sinh Ticket mới (ngẫu nhiên)</span>
+          <span id="aiLoadingSpinner" class="hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+        </button>
+        <div class="text-[10px] text-slate-400 mt-1.5 flex items-center justify-between px-1">
+          <span id="aiStatus">AI: chưa bật</span>
+          <span class="text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Sẵn sàng</span>
+        </div>
+      </div>
+
+      <!-- Ticket Queue Header & Filters -->
+      <div class="bg-slate-900/90 rounded-xl border border-slate-800 flex flex-col flex-1 overflow-hidden shadow-md">
+        <div class="p-3 border-b border-slate-800 bg-slate-950/60">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i class="fa-solid fa-inbox text-emerald-400"></i> Hộp thư Sự cố & Yêu cầu
+            </h2>
+            <span id="ticketCountBadge" class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[11px] font-mono font-bold px-2 py-0.5 rounded-md">
+              0 / 0
+            </span>
+          </div>
+
+          <!-- Filter Tabs -->
+          <div class="grid grid-cols-4 gap-1 text-[11px] font-medium bg-slate-900 p-1 rounded-lg border border-slate-800">
+            <button onclick="setFilter('all')" id="filter-all" class="filter-tab px-1.5 py-1 rounded text-center transition bg-emerald-600 text-white font-semibold">Tất cả</button>
+            <button onclick="setFilter('sec')" id="filter-sec" class="filter-tab px-1.5 py-1 rounded text-center text-slate-400 hover:text-slate-200 transition">An ninh</button>
+            <button onclick="setFilter('mac')" id="filter-mac" class="filter-tab px-1.5 py-1 rounded text-center text-slate-400 hover:text-slate-200 transition">Đ/kí MAC</button>
+            <button onclick="setFilter('edu')" id="filter-edu" class="filter-tab px-1.5 py-1 rounded text-center text-slate-400 hover:text-slate-200 transition">Đào tạo</button>
+          </div>
+        </div>
+
+        <!-- Ticket List Scrollable Container -->
+        <div id="ticketList" class="flex-1 overflow-y-auto p-2 space-y-2">
+          <!-- Dynamically Rendered Tickets -->
+        </div>
+
+        <!-- Ticket Bottom Legend -->
+        <div class="p-2 border-t border-slate-800/80 bg-slate-950/40 text-[10px] text-slate-500 flex items-center justify-between font-mono">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Nghiêm trọng / Cao</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Trung bình</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-500"></span> Thấp</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CỘT GIỮA (6/12): KHU VỰC PHÂN TÍCH & WORKSPACE ==================== -->
+    <section class="col-span-12 lg:col-span-6 flex flex-col gap-3 h-[calc(100vh-5.5rem)]">
+      
+      <!-- Active Ticket Banner -->
+      <div id="activeTicketHeader" class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 shadow-md flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="activeTicketIcon" class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-file-shield"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="activeTicketCode" class="font-mono text-xs font-bold text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/60">TICKET-####</span>
+              <span id="activeTicketSeverity" class="text-xs px-2 py-0.5 rounded font-bold font-mono">Mức độ</span>
+              <span id="activeTicketCategory" class="text-xs text-slate-400">Phân loại</span>
+            </div>
+            <h1 id="activeTicketTitle" class="text-sm md:text-base font-bold text-white mt-1 leading-snug truncate max-w-[450px]">
+              Vui lòng chọn một Ticket từ danh sách bên trái
+            </h1>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-[10px] uppercase font-mono text-slate-400">Thời gian phản hồi SLA</div>
+          <div id="activeTicketSlaCountdown" class="font-mono text-base font-extrabold text-amber-400 flex items-center gap-1 justify-end">
+            <i class="fa-solid fa-stopwatch text-xs"></i> <span>--:--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKSPACE TABS & CONTENT -->
+      <div class="bg-slate-900/90 rounded-xl border border-slate-800 flex flex-col flex-1 overflow-hidden shadow-lg">
+        
+        <!-- Tab Navigation -->
+        <div class="flex items-center border-b border-slate-800 bg-slate-950/60 px-2 pt-2 gap-1 overflow-x-auto text-xs font-medium">
+          <button onclick="switchTab('tab-details')" id="btn-tab-details" class="workspace-tab px-3 py-2 rounded-t-lg flex items-center gap-2 border-b-2 border-emerald-400 bg-slate-800 text-emerald-400 font-semibold transition">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>Chi tiết & Bằng chứng</span>
+          </button>
+          <button onclick="switchTab('tab-nac')" id="btn-tab-nac" class="workspace-tab px-3 py-2 rounded-t-lg flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+            <i class="fa-solid fa-network-wired"></i>
+            <span>Tra cứu NAC / OUI</span>
+          </button>
+          <button onclick="switchTab('tab-logs')" id="btn-tab-logs" class="workspace-tab px-3 py-2 rounded-t-lg flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+            <i class="fa-solid fa-terminal"></i>
+            <span>Trình đọc Log & Header</span>
+          </button>
+          <button onclick="switchTab('tab-tools')" id="btn-tab-tools" class="workspace-tab px-3 py-2 rounded-t-lg flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition">
+            <i class="fa-solid fa-bullhorn"></i>
+            <span>Phát Thông báo & Tool</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT AREA -->
+        <div class="flex-1 overflow-y-auto p-4 bg-[#0a101f]/70">
+          
+          <!-- TAB 1: CHI TIẾT SỰ CỐ & BẰNG CHỨNG -->
+          <div id="tab-details" class="tab-pane space-y-4">
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <span class="text-slate-500 block text-[10px] uppercase font-mono mb-1">Nguồn yêu cầu / Người báo cáo</span>
+                <span id="detailSource" class="font-semibold text-slate-200 flex items-center gap-1.5 text-sm">
+                  <i class="fa-solid fa-user-shield text-emerald-400"></i> --
+                </span>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800">
+                <span class="text-slate-500 block text-[10px] uppercase font-mono mb-1">Địa điểm / Phân vùng mạng</span>
+                <span id="detailLocation" class="font-semibold text-sky-300 font-mono text-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-location-dot text-sky-400"></i> --
+                </span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-align-left text-emerald-400"></i> Mô tả chi tiết vụ việc
+              </h3>
+              <p id="detailDescription" class="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-line">
+                Chọn ticket để xem mô tả chi tiết.
+              </p>
+            </div>
+
+            <!-- Key Indicators / Evidence Summary -->
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-fingerprint text-amber-400"></i> Dấu hiệu nhận diện & Dữ liệu kỹ thuật
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-2 font-mono text-[11px]">
+                <div class="bg-slate-950 p-2 rounded border border-slate-800/80">
+                  <span class="text-slate-500 block text-[9px]">IP GỐC / NGUỒN</span>
+                  <span id="detailSrcIp" class="text-sky-300 font-bold">--</span>
+                </div>
+                <div class="bg-slate-950 p-2 rounded border border-slate-800/80">
+                  <span class="text-slate-500 block text-[9px]">ĐỊA CHỈ MAC</span>
+                  <span id="detailMac" class="text-emerald-400 font-bold">--</span>
+                </div>
+                <div class="bg-slate-950 p-2 rounded border border-slate-800/80">
+                  <span class="text-slate-500 block text-[9px]">LOẠI THIẾT BỊ / USER AGENT</span>
+                  <span id="detailDevice" class="text-amber-300 truncate block">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Recommended SOP Guideline -->
+            <div class="p-3 rounded-lg border border-emerald-900/40 bg-emerald-950/20 text-xs text-emerald-300/90">
+              <div class="font-bold flex items-center gap-1.5 mb-1 text-emerald-400">
+                <i class="fa-solid fa-book-bookmark"></i> Hướng dẫn Quy trình SOP (Học viện T48):
+              </div>
+              <div id="sopHintText" class="text-[11px] leading-relaxed text-slate-300">Đối chiếu lời khai với log kỹ thuật. Chọn căn cứ (câu mô tả / dòng log) rồi mới Commit. Sai 3 lần, ticket bị chuyển kíp khác.</div>
+            </div>
+          </div>
+
+          <!-- TAB 2: TRA CỨU MAC/OUI & QUẢN LÝ RADIUS/DHCP -->
+          <div id="tab-nac" class="tab-pane hidden space-y-4">
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-microchip text-sky-400"></i> Công cụ tra cứu MAC Address & Vendor OUI</span>
+                <span class="text-[10px] text-slate-500 font-mono">IEEE OUI Database</span>
+              </h3>
+              <div class="flex gap-2">
+                <input type="text" id="nacInputMac" placeholder="VD: 3C:D9:2B:44:A1:0F hoặc e4:5f:01:..." 
+                  class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-sky-500 uppercase">
+                <button onclick="lookupMacOui()" class="bg-sky-600 hover:bg-sky-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-magnifying-glass"></i> Tra cứu
+                </button>
+                <button onclick="pasteCurrentTicketMac()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-mono border border-slate-700 transition" title="Lấy MAC từ ticket hiện tại">
+                  <i class="fa-solid fa-arrow-down-long"></i> Lấy MAC Ticket
+                </button>
+              </div>
+
+              <!-- MAC Inspection Result Card -->
+              <div id="nacResultBox" class="mt-3 bg-slate-950 p-3 rounded-lg border border-slate-800 font-mono text-xs space-y-1.5">
+                <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                  <span class="text-slate-500">Trạng thái định dạng:</span>
+                  <span id="nacResFormat" class="text-emerald-400 font-bold">Hợp lệ (EUI-48)</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                  <span class="text-slate-500">Nhà sản xuất (Vendor / OUI):</span>
+                  <span id="nacResVendor" class="text-amber-300 font-bold">Apple, Inc.</span>
+                </div>
+                <div class="flex justify-between border-b border-slate-800/80 pb-1">
+                  <span class="text-slate-500">Loại địa chỉ:</span>
+                  <span id="nacResType" class="text-sky-300">Unicast / Globally Unique</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-slate-500">Cảnh báo Spoofing / Random MAC:</span>
+                  <span id="nacResSpoof" class="text-emerald-400 font-semibold">Bình thường (Hardware MAC)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- NAC / Radius & DHCP Controller Panel -->
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-shield-virus text-emerald-400"></i> Bảng điều khiển RADIUS / FreeRADIUS 802.1X T48
+              </h3>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                  <div class="text-[10px] text-slate-500 font-mono">BINDING IP-MAC THỰC HIỆN:</div>
+                  <div class="font-mono text-slate-200 mt-1 flex items-center gap-2 text-[11px]">
+                    <span id="bindIpPreview" class="text-sky-300 font-bold">10.48.20.105</span>
+                    <i class="fa-solid fa-arrows-left-right text-slate-600 text-[10px]"></i>
+                    <span id="bindMacPreview" class="text-emerald-400 font-bold">3C:D9:2B:44:A1:0F</span>
+                  </div>
+                </div>
+                <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+                  <div class="text-[10px] text-slate-500 font-mono">VLAN TRUY CẬP PHÂN BỔ:</div>
+                  <div id="vlanPreview" class="font-mono text-emerald-400 font-bold mt-1 text-[11px]">
+                    VLAN 104 - HOC_VIEN_WIFI
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button onclick="simulateNacAction('whitelist')" class="flex-1 bg-emerald-700/60 hover:bg-emerald-600 text-emerald-200 py-1.5 rounded text-xs font-semibold border border-emerald-600/50 flex items-center justify-center gap-1.5 transition">
+                  <i class="fa-solid fa-check"></i> Test Nạp Whitelist Radius
+                </button>
+                <button onclick="simulateNacAction('blacklist')" class="flex-1 bg-red-800/60 hover:bg-red-700 text-red-200 py-1.5 rounded text-xs font-semibold border border-red-600/50 flex items-center justify-center gap-1.5 transition">
+                  <i class="fa-solid fa-ban"></i> Test Đẩy Blacklist Firewall
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: TRÌNH ĐỌC LOG & EMAIL HEADER VỚI HIGHLIGHT TỰ ĐỘNG -->
+          <div id="tab-logs" class="tab-pane hidden space-y-4">
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-code text-amber-400"></i> Nhật ký Raw Log / Email Header / HTTP Payload
+                </h3>
+                <div class="flex items-center gap-2">
+                  <button onclick="copyRawLog()" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded border border-slate-700 flex items-center gap-1">
+                    <i class="fa-regular fa-copy"></i> Copy Log
+                  </button>
+                </div>
+              </div>
+
+              <!-- Keyword Highlight Badges Bar -->
+              <div class="flex flex-wrap items-center gap-1.5 mb-2.5 text-[10px] font-mono bg-slate-950 p-2 rounded border border-slate-800">
+                <span class="text-slate-500 font-sans font-bold">Từ khóa phát hiện:</span>
+                <span class="highlight-malicious">SELECT/UNION</span>
+                <span class="highlight-malicious">powershell/eval</span>
+                <span class="highlight-malicious">fake-domain</span>
+                <span class="highlight-warning">404 / 500 / 401</span>
+                <span class="highlight-mac">MAC Dup/Spoof</span>
+              </div>
+
+              <!-- Formatted Raw Log Output Viewer -->
+              <div class="relative">
+                <div id="rawLogViewer" class="bg-black/90 text-slate-300 font-mono text-[11px] p-3.5 rounded-lg border border-slate-800 max-h-[320px] overflow-y-auto leading-relaxed whitespace-pre-wrap select-text">
+                  <!-- Injected highlighted logs -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: PHÁT THÔNG BÁO HÀNG LOẠT & TIỆN ÍCH GIẢI MÃ -->
+          <div id="tab-tools" class="tab-pane hidden space-y-4">
+            
+            <!-- Mass Notification Dispatcher -->
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-bullhorn text-sky-400"></i> Soạn & Phát Thông Báo Đào Tạo Toàn Học Viện
+              </h3>
+              <div class="space-y-2 text-xs">
+                <div>
+                  <label class="block text-[10px] text-slate-400 font-mono mb-1">ĐỐI TƯỢNG TIẾP NHẬN:</label>
+                  <select id="notifyAudience" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200">
+                    <option value="all">Toàn thể Cán bộ, Giảng viên & Học viên T48</option>
+                    <option value="k55">Khóa D55 & D56 (Hệ Đào tạo Chính quy)</option>
+                    <option value="ktx">Khu Nội trú & Ký túc xá T3, T4</option>
+                    <option value="staff">Khối Phòng ban & Quản trị Hệ thống</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 font-mono mb-1">TIÊU ĐỀ THÔNG BÁO:</label>
+                  <input type="text" id="notifyTitle" value="[CẢNH BÁO AN NINH] Cập nhật Mật khẩu Cổng Thông tin Đào tạo T48" 
+                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-medium">
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 font-mono mb-1">NỘI DUNG THÔNG BÁO KHẨN:</label>
+                  <textarea id="notifyContent" rows="3" 
+                    class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 font-sans leading-relaxed">Yêu cầu toàn thể học viên kiểm tra và đổi mật khẩu tài khoản Cổng Đào tạo Học viện ngay lập tức. Tuyệt đối không đăng nhập vào đường link lạ giả mạo cổng fap.t48-edu.vn.</textarea>
+                </div>
+                <button onclick="dispatchBroadcastNotification()" class="w-full bg-cyan-700/70 hover:bg-cyan-600 text-white font-semibold py-2 rounded-lg text-xs flex items-center justify-center gap-2 transition border border-cyan-500/40">
+                  <i class="fa-solid fa-paper-plane"></i> Phê duyệt & Phát Broadcast qua SMS & Portal
+                </button>
+              </div>
+            </div>
+
+            <!-- Base64 & Hash Decoder Tool -->
+            <div class="bg-slate-900/80 p-3.5 rounded-lg border border-slate-800">
+              <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-key text-amber-400"></i> Công cụ Giải mã Base64 / URL Decode Nhanh</span>
+                <span class="text-[10px] font-mono text-slate-500">Security Analyst Utility</span>
+              </h3>
+              <div class="flex gap-2">
+                <input type="text" id="decodeInput" placeholder="Nhập chuỗi Base64 hoặc URL encoded..." 
+                  class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500">
+                <button onclick="decodeTextPayload()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition">
+                  Giải mã
+                </button>
+              </div>
+              <div class="mt-2 bg-slate-950 p-2 rounded border border-slate-800 font-mono text-xs text-emerald-400 min-h-[32px] flex items-center" id="decodeResult">
+                <span class="text-slate-600 italic font-sans text-[11px]">Kết quả giải mã sẽ xuất hiện ở đây...</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== CỘT PHẢI (3/12): ACTION CONSOLE & BẢNG ĐIỂM KPI ==================== -->
+    <section class="col-span-12 lg:col-span-3 flex flex-col gap-3 h-[calc(100vh-5.5rem)]">
+      
+      <!-- KPI & EXP Scoreboard -->
+      <div class="bg-slate-900/90 rounded-xl border border-slate-800 p-3.5 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-emerald-400"></i> Tiến Độ & Đánh Giá Ca Trực
+          </h2>
+          <span id="rankBadge" class="text-[10px] font-mono text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60 font-bold">
+            Học viên Trực ban
+          </span>
+        </div>
+
+        <!-- Weekly EXP Progress Bar -->
+        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800/90">
+          <div class="flex items-center justify-between text-[11px] font-mono mb-1.5">
+            <span class="text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-star text-amber-400 text-xs"></i> 
+              <span>EXP Tuần <span id="kpiWeekNumber" class="text-amber-400 font-bold">1</span>:</span>
+            </span>
+            <span class="font-bold">
+              <span id="kpiWeeklyExp" class="text-emerald-400">0</span>
+              <span class="text-slate-600">/</span>
+              <span id="kpiWeeklyTarget" class="text-slate-400">500 EXP</span>
+            </span>
+          </div>
+          <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
+            <div id="kpiWeeklyExpBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1 font-mono">
+            <span>Ca: <span id="kpiDayCount" class="text-slate-300">Ngày 1/7</span></span>
+            <span>Tổng EXP tích lũy: <span id="kpiTotalExp" class="text-amber-300 font-bold">0</span></span>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-3 gap-2">
+          <!-- Reputation -->
+          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800/80 text-center">
+            <span class="text-[9px] text-slate-500 block font-mono">UY TÍN</span>
+            <span id="kpiReputation" class="text-sm md:text-base font-extrabold text-emerald-400 font-mono">100%</span>
+            <div class="w-full bg-slate-800 h-1 rounded-full mt-1 overflow-hidden">
+              <div id="kpiReputationBar" class="bg-emerald-500 h-full rounded-full transition-all duration-300" style="width: 100%"></div>
+            </div>
+          </div>
+          
+          <!-- SLA % -->
+          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800/80 text-center">
+            <span class="text-[9px] text-slate-500 block font-mono">SLA %</span>
+            <span id="kpiSla" class="text-sm md:text-base font-extrabold text-sky-400 font-mono">100%</span>
+            <div class="w-full bg-slate-800 h-1 rounded-full mt-1 overflow-hidden">
+              <div id="kpiSlaBar" class="bg-sky-500 h-full rounded-full transition-all duration-300" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <!-- Total Score -->
+          <div class="bg-slate-950 p-2 rounded-lg border border-slate-800/80 text-center">
+            <span class="text-[9px] text-slate-500 block font-mono">HÔM NAY</span>
+            <span id="kpiScore" class="text-sm md:text-base font-extrabold text-amber-400 font-mono">0</span>
+            <span class="text-[9px] text-slate-500 font-mono block">Đã xong: <span id="kpiResolved">0</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Console Box -->
+      <div class="bg-slate-900/90 rounded-xl border border-slate-800 flex flex-col flex-1 overflow-hidden shadow-lg">
+        <div class="p-3 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+            <i class="fa-solid fa-gamepad text-amber-400"></i> Bảng Thực Thi Xử Lý (SOP)
+          </h2>
+          <span class="text-[10px] text-slate-500 font-mono">T48 SOC Incident Console</span>
+        </div>
+
+        <div class="p-3 text-[11px] text-slate-400 border-b border-slate-800/60 bg-slate-900/40">
+          Hãy đối chiếu kỹ thuật từ <span class="text-sky-300 font-semibold">Cột giữa</span> và đánh dấu các hành động chính xác theo Quy trình Vận hành Tiêu chuẩn (SOP).
+        </div>
+
+        <div class="px-3 pt-2.5 pb-2 border-b border-slate-800/60 bg-amber-950/10">
+          <div class="text-[10px] font-mono text-amber-400 flex justify-between"><span><i class="fa-solid fa-magnifying-glass"></i> CĂN CỨ: bấm câu mô tả / dòng log để chọn (tối đa 2)</span><span id="evCount">0/2</span></div>
+          <div id="evList" class="mt-1 space-y-1 text-[10px] text-slate-300 font-mono"></div>
+        </div>
+        <!-- Checkbox Action List -->
+        <div class="flex-1 overflow-y-auto p-3 space-y-2.5" id="actionCheckboxList">
+          
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="whitelist_mac" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Duyệt Whitelist MAC thiết bị</span>
+              <span class="text-[10px] text-slate-400">Cấp quyền truy cập hệ thống Wi-Fi Thư viện / KTX qua FreeRADIUS.</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="blacklist_mac" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-red-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Chặn / Đưa vào Blacklist MAC</span>
+              <span class="text-[10px] text-slate-400">Chặn tuyệt đối địa chỉ MAC trên bộ phát AP và Switch Layer 2.</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="isolate_host" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-amber-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Cách ly Cổng Switch / Cách ly Máy trạm</span>
+              <span class="text-[10px] text-slate-400">Shutdown port switch hoặc cô lập máy tính nghi ngờ nhiễm mã độc.</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="reset_password" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Reset Mật khẩu / Khóa Tài khoản Cổng Đào tạo</span>
+              <span class="text-[10px] text-slate-400">Vô hiệu hóa phiên đăng nhập và tạo token cấp lại mật khẩu bảo mật.</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="block_ip_domain" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-purple-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Chặn IP / Tên miền Độc hại trên Firewall</span>
+              <span class="text-[10px] text-slate-400">Cấu hình Rule Firewall Fortinet chặn C2 / Phishing domain bên ngoài.</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="broadcast_alert" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Phê duyệt & Phát Thông báo Toàn trường</span>
+              <span class="text-[10px] text-slate-400">Đẩy thông báo khẩn cấp đến Cổng đào tạo hoặc email/SMS học viên.</span>
+            </div>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-2 rounded-lg bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 cursor-pointer transition">
+            <input type="checkbox" value="escalate_tier2" class="sop-action-check mt-0.5 rounded bg-slate-900 border-slate-700 text-red-500 focus:ring-0">
+            <div>
+              <span class="font-semibold text-slate-200 block text-xs">Báo cáo Lãnh đạo / Chuyển Tier 2 Xử lý Chuyên sâu</span>
+              <span class="text-[10px] text-slate-400">Báo cáo Trực ban T48 & Đội Ứng cứu Sự cố khi có dấu hiệu APT / Đột nhập.</span>
+            </div>
+          </label>
+
+        </div>
+
+        <!-- Submit Button Footer -->
+        <div class="p-3 bg-slate-950/80 border-t border-slate-800 space-y-2">
+          <button id="btnSubmitResolution" onclick="submitTicketResolution()" 
+            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs md:text-sm shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 transition duration-200 border border-emerald-400/40">
+            <i class="fa-solid fa-stamp"></i>
+            <span>XÁC NHẬN XỬ LÝ (COMMIT SOP)</span>
+          </button>
+          
+          <div class="flex items-center justify-between text-[10px] text-slate-500 px-1 font-mono">
+            <span>Đúng: +100 Điểm</span>
+            <span>Sai/Thiếu: -50 Điểm</span>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <div id="supWin" class="fixed top-16 right-3 z-30 w-72 max-h-[85vh] overflow-y-auto bg-slate-900/95 border border-pink-500/40 rounded-2xl shadow-2xl backdrop-blur text-xs">
+    <div class="flex items-center justify-between px-3 py-1.5 border-b border-slate-800 cursor-pointer select-none" onclick="supToggle()">
+      <span class="font-bold text-pink-300"><i class="fa-solid fa-headset"></i> Quầy hỗ trợ IT · Học viên</span><span id="supIc" class="text-slate-400">▾</span>
+    </div>
+    <div id="supBody" class="p-2.5 space-y-2 select-text">
+      <div class="flex gap-2 items-start">
+        <div id="supChibi" class="w-20 h-24 shrink-0 chibi-bob"></div>
+        <div id="supBubble" class="flex-1 bg-white text-slate-800 rounded-xl rounded-tl-none p-2 text-[11px] leading-snug">...</div>
+      </div>
+      <div id="supForm" class="grid grid-cols-2 gap-1.5">
+        <input id="supName" class="sup-in" placeholder="Họ tên">
+        <input id="supClass" class="sup-in" placeholder="Lớp (VD: B1-D55)">
+        <input id="supMac" class="sup-in col-span-2 font-mono uppercase" placeholder="Địa chỉ MAC (tự nhập)">
+        <select id="supCat" class="sup-in"><option value="">Loại sự cố…</option><option value="mac">Đăng ký MAC</option><option value="sec">An ninh mạng</option><option value="edu">Đào tạo</option></select>
+        <select id="supSev" class="sup-in"><option value="">Mức độ…</option><option value="low">Thấp</option><option value="medium">Trung bình</option><option value="high">Cao</option><option value="critical">Nghiêm trọng</option></select>
+        <input id="supLoc" class="sup-in col-span-2" placeholder="Vị trí (VD: KTX T3, Thư viện…)">
+        <textarea id="supDesc" rows="2" class="sup-in col-span-2" placeholder="Tóm tắt sự cố (≥ 10 ký tự)"></textarea>
+        <button onclick="supSubmit()" class="col-span-2 bg-pink-600 hover:bg-pink-500 text-white font-bold py-1.5 rounded-lg text-xs"><i class="fa-solid fa-ticket"></i> Tạo Ticket</button>
+      </div>
+      <button id="supNextBtn" onclick="supNext()" class="hidden w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 py-1.5 rounded-lg text-xs">Gọi học viên tiếp theo</button>
+    </div>
+  </div>
+  <!-- MODAL / TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- RESOLUTION FEEDBACK MODAL -->
+  <div id="feedbackModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 shadow-2xl transform transition-all text-slate-200">
+      <div id="feedbackModalHeader" class="flex items-center gap-3 mb-3">
+        <div id="feedbackModalIcon" class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-black"></div>
+        <div>
+          <h3 id="feedbackModalTitle" class="text-base font-bold">Kết quả xử lý sự cố</h3>
+          <span id="feedbackModalScoreChange" class="text-xs font-mono font-bold"></span>
+        </div>
+      </div>
+      <div id="feedbackModalBody" class="text-xs text-slate-300 bg-slate-950 p-3.5 rounded-xl border border-slate-800 mb-4 leading-relaxed font-sans max-h-48 overflow-y-auto">
+        <!-- Result explanation -->
+      </div>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeFeedbackModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold py-2 rounded-lg text-xs transition border border-slate-700">
+          Đã rõ, tiếp tục ca trực
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="eventModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-5 shadow-2xl text-slate-200">
+      <h3 id="evtTitle" class="text-base font-bold text-amber-400 mb-2"></h3>
+      <div id="evtBody" class="text-xs text-slate-300 bg-slate-950 p-3.5 rounded-xl border border-slate-800 mb-4 leading-relaxed whitespace-pre-line"></div>
+      <div id="evtBtns" class="flex flex-col gap-2"></div>
+    </div>
+  </div>
+  <!-- DAY END REPORT MODAL (GIAO BAN SANG NGÀY MỚI / TỔNG KẾT TUẦN) -->
+  <div id="dayReportModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#0f172a] border border-slate-700/80 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl text-slate-200 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950 flex items-center justify-center text-xl font-black shadow-lg shadow-amber-500/20">
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white uppercase tracking-wide">Báo Cáo Giao Ban Ca Trực</h3>
+            <div class="text-xs text-amber-400 font-mono" id="dayReportSubTitle">Kết thúc Ngày 1 - Tuần 1</div>
+          </div>
+        </div>
+        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">T48-DEBRIEF</span>
+      </div>
+
+      <!-- Report Content -->
+      <div class="py-4 space-y-3.5 text-xs">
+        <div class="grid grid-cols-2 gap-2.5 font-mono">
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 block uppercase">Ticket Hoàn Thành</span>
+            <span id="repTicketsResolved" class="text-lg font-extrabold text-emerald-400">0</span>
+            <span class="text-[10px] text-slate-500 block">trên tổng số ca trực</span>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 block uppercase">EXP Thu Hoạch Hôm Nay</span>
+            <span id="repExpGained" class="text-lg font-extrabold text-amber-400">+0 EXP</span>
+            <span class="text-[10px] text-slate-500 block">tích lũy vào tuần</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 space-y-2">
+          <div class="flex justify-between items-center text-[11px] font-mono">
+            <span class="text-slate-400">Độ tin cậy & Uy tín hiện tại:</span>
+            <span id="repReputationVal" class="text-emerald-400 font-bold">100%</span>
+          </div>
+          <div class="flex justify-between items-center text-[11px] font-mono">
+            <span class="text-slate-400">Cấp bậc Sĩ quan / Chức danh:</span>
+            <span id="repRankVal" class="text-sky-300 font-bold">Học viên Trực ban</span>
+          </div>
+          <div class="flex justify-between items-center text-[11px] font-mono">
+            <span class="text-slate-400">Mục tiêu EXP tuần hiện tại:</span>
+            <span id="repWeekProgressVal" class="text-amber-300 font-bold">0 / 500 EXP</span>
+          </div>
+        </div>
+
+        <!-- Weekly Summary Special Notification if weekend reached -->
+        <div id="repWeeklyAwardBox" class="hidden p-3 rounded-xl bg-gradient-to-r from-emerald-950/60 to-teal-950/60 border border-emerald-500/40 text-emerald-300">
+          <div class="flex items-center gap-2 font-bold mb-1">
+            <i class="fa-solid fa-trophy text-amber-400"></i>
+            <span id="repWeeklyAwardTitle">TỔNG KẾT ĐÁNH GIÁ THI ĐUA TUẦN!</span>
+          </div>
+          <p id="repWeeklyAwardDesc" class="text-[11px] text-slate-300 leading-relaxed font-sans">
+            Chúc mừng đồng chí đã hoàn thành tuần huấn luyện trực ban!
+          </p>
+        </div>
+
+        <div class="text-[11px] text-slate-400 italic bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/60 font-sans" id="repDebriefNote">
+          Kíp trực tiếp theo đã sẵn sàng nhận bàn giao hệ thống giám sát. Các ticket tồn đọng sẽ được chuyển giao tiếp tục theo dõi.
+        </div>
+      </div>
+
+      <div class="pt-2 flex gap-2.5">
+        <button onclick="startNextDaySession()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-sun text-amber-300"></i>
+          <span>Bắt đầu Ca Trực Ngày Tiếp Theo</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIO CONTEXT GENERATOR FOR REALISTIC SOUND EFFECTS -->
+  <script>
+    // Web Audio API Synthesizer (No external mp3 dependency required)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let soundEnabled = true;
+
+    function playBeep(frequency = 600, duration = 0.1, type = 'sine') {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.warn('Audio play error:', e);
+      }
+    }
+
+    function playSuccessSound() {
+      if (!soundEnabled) return;
+      playBeep(523.25, 0.1, 'triangle');
+      setTimeout(() => playBeep(659.25, 0.1, 'triangle'), 100);
+      setTimeout(() => playBeep(783.99, 0.25, 'triangle'), 200);
+    }
+
+    function playErrorSound() {
+      if (!soundEnabled) return;
+      playBeep(300, 0.15, 'sawtooth');
+      setTimeout(() => playBeep(200, 0.25, 'sawtooth'), 150);
+    }
+
+    function toggleAudioPrompt() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      if (soundEnabled) {
+        btn.innerHTML = `<i class="fa-solid fa-volume-high text-emerald-400"></i><span class="hidden sm:inline">Âm thanh: BẬT</span>`;
+        showToast('Âm thanh hiệu ứng đã BẬT', 'info');
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-volume-xmark text-slate-500"></i><span class="hidden sm:inline">Âm thanh: TẮT</span>`;
+        showToast('Âm thanh hiệu ứng đã TẮT', 'info');
+      }
+    }
+  </script>
+
+  <!-- GAME LOGIC SCRIPT -->
+  <script>
+    // ==========================================
+    // 1. CONFIGURATION & STATE
+    // ==========================================
+    const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    // Known OUI database for realistic NAC lookup
+    const OUI_DATABASE = {
+      "3C:D9:2B": { vendor: "Hewlett Packard Enterprise", type: "Laptop/Workstation" },
+      "AC:DE:48": { vendor: "Dell Inc.", type: "Laptop Precision/Latitude" },
+      "E4:5F:01": { vendor: "Raspberry Pi Trading Ltd", type: "IoT Device / Mini PC" },
+      "00:0C:29": { vendor: "VMware, Inc.", type: "Virtual Machine Adapter" },
+      "08:00:27": { vendor: "Oracle VirtualBox", type: "Virtual Machine Adapter" },
+      "B4:2E:99": { vendor: "Apple, Inc.", type: "MacBook Pro / Air" },
+      "50:EB:71": { vendor: "Lenovo Mobile Communication", type: "Lenovo ThinkPad" },
+      "00:1A:2B": { vendor: "Ayecom Technology Co., Ltd", type: "Unknown Dongle" },
+      "F4:F5:DB": { vendor: "Samsung Electronics", type: "Mobile / Tablet Device" }
+    };
+
+    // Preloaded Vietnamese Sample Tickets
+    const DEFAULT_TICKETS = [
+      {
+        id: "TICKET-1048",
+        title: "Học viên Lớp B1D55 gửi yêu cầu đăng ký MAC Laptop truy cập Wi-Fi Thư viện",
+        category: "mac", // "sec" | "mac" | "edu"
+        severity: "low", // "low" | "medium" | "high" | "critical"
+        source: "Học viên Trần Tuấn Anh (B1-D55-ANM)",
+        location: "Thư viện T48 / AP-LIB-FLOOR2",
+        src_ip: "10.48.20.105",
+        mac: "3C:D9:2B:44:A1:0F",
+        device: "Laptop HP ProBook 450 G8 (Windows 11 Education)",
+        sla_seconds: 300,
+        status: "open", // "open" | "resolved"
+        description: "Kính gửi Phòng Quản trị mạng và An ninh mạng Học viện T48,\nTôi là học viên Trần Tuấn Anh thuộc Trung đội B1, Khóa D55. Tôi xin phép được đăng ký địa chỉ MAC card mạng không dây của máy tính xách tay cá nhân để truy cập mạng Wi-Fi Thư viện (SSID: T48_STUDENT_LIB) phục vụ tra cứu học tập và làm bài tập chuyên đề môn An ninh Hệ thống thông tin.\nThiết bị đã cài đặt đầy đủ phần mềm diệt virus bản quyền và cam kết chấp hành nghiêm chỉnh quy chế ATTT của Học viện.",
+        raw_log: "[NAC-REG-PORTAL 2026-10-10 14:15:02]\nREQUEST_TYPE: NAC_ENROLLMENT_WIFI\nUSER: tts_trantuananh_b1d55@hocvienan.edu.vn\nIP_REQUEST: 10.48.20.105 (DHCP Lease Pool D55)\nMAC_ADDRESS: 3C:D9:2B:44:A1:0F\nOUI_VENDOR_MATCH: Hewlett Packard\nHOST_NAME: DESKTOP-T48-ANH\nANTIVIRUS_STATUS: Active (Kaspersky Endpoint T48)\nTARGET_SSID: T48_STUDENT_LIB (VLAN 104)",
+        correct_actions: ["whitelist_mac"],
+        sop_explanation: "Theo quy trình cấp phát quyền truy cập mạng cá nhân: Sau khi đối chiếu OUI hợp lệ (Hewlett Packard), kiểm tra không trùng lặp và học viên đã khai báo đúng thông tin lớp, Cán bộ trực thực hiện 'Duyệt Whitelist MAC thiết bị' vào FreeRadius VLAN 104."
+      },
+      {
+        id: "TICKET-1049",
+        title: "Hệ thống IDS báo Cảnh báo giả mạo MAC (MAC Spoofing) bypass Firewall tại Khu KTX T3",
+        category: "sec",
+        severity: "high",
+        source: "Suricata IDS / FortiGate SIEM Agent",
+        location: "Khu Nội trú KTX T3 / Switch SW-KTX-T3-CORE",
+        src_ip: "10.48.110.45",
+        mac: "00:0C:29:FE:AA:12",
+        device: "Kali Linux / VMware Virtual Adapter (Spoofed as HP Switch)",
+        sla_seconds: 240,
+        status: "open",
+        description: "Hệ thống phát hiện xâm nhập (Suricata IDS) kích hoạt cảnh báo mức độ CAO:\nPhát hiện lưu lượng bất thường phát sinh từ Cổng 18 của Switch SW-KTX-T3-CORE. Địa chỉ MAC 00:0C:29:FE:AA:12 đang liên tục gửi các gói tin ARP Reply giả mạo (ARP Spoofing/Poisoning) nhằm mạo danh Default Gateway 10.48.110.1 của khu ký túc xá để nghe lén gói tin và bypass hệ thống chứng thực NAC.\nPhát hiện thêm các chuỗi quét cổng và nỗ lực khai thác lỗ hổng đào bới mật khẩu nội bộ.",
+        raw_log: "[ALERT-IDS-SURICATA 2026-10-10 14:22:18]\n[**] [1:2000341:2] ET SCAN Potential ARP Spoofing / Duplicate MAC Flooding [**]\n[Classification: Attempted Information Leak] [Priority: 1]\n10/10-14:22:18.114321 00:0C:29:FE:AA:12 -> FF:FF:FF:FF:FF:FF ARP who-has 10.48.110.1 tell 10.48.110.45\n10/10-14:22:19.452109 SRC=10.48.110.45 DST=10.48.1.1 LEN=124 PROTO=TCP DPT=8080 SYN\nPAYLOAD: powershell -nop -w hidden -enc JABzAD0ATgBlAHcALQBPAGIAagBlAGMAdAAg... fake-domain: mal-t48-c2.ddns.net\nHTTP_STATUS: 401 Unauthorized -> 404 Not Found\nSWITCH_PORT: GigabitEthernet1/0/18 (VLAN 110)",
+        correct_actions: ["blacklist_mac", "isolate_host", "escalate_tier2"],
+        sop_explanation: "Đây là sự cố An ninh mạng nghiêm trọng có dấu hiệu ARP Spoofing và C2 Powershell bypass NAC. Cán bộ SOC phải lập tức: (1) Chặn Blacklist MAC, (2) Cách ly Switch Port/Cắt kết nối máy trạm, và (3) Báo cáo Trực ban & Chuyển Tier 2 để thu giữ vật chứng điều tra."
+      },
+      {
+        id: "TICKET-1050",
+        title: "Ban Giám đốc chỉ đạo phát Thông báo khẩn về Bảo mật Mật khẩu Cổng Đào tạo Học viên",
+        category: "edu",
+        severity: "medium",
+        source: "Ban Giám đốc & Phòng Khảo thí - Đảm bảo Chất lượng Đào tạo",
+        location: "Toàn Học viện / Cổng portal fap.t48-edu.vn",
+        src_ip: "10.48.1.15",
+        mac: "AC:DE:48:11:88:23",
+        device: "Server Portal FAP Đào tạo (CentOS Enterprise)",
+        sla_seconds: 400,
+        status: "open",
+        description: "Theo chỉ đạo trực tiếp từ Lãnh đạo Học viện:\nGần đây một số học viên bị kẻ xấu dụ dỗ đăng nhập vào trang web giả mạo (phishing) mạo danh Cổng Đào tạo FAP T48 nhằm chiếm đoạt tài khoản xem điểm và thông tin cá nhân. Phòng CNTT cần: \n1. Khẩn trương soạn và phát Thông báo bảo mật hàng loạt tới toàn thể học viên các khóa.\n2. Yêu cầu toàn bộ học viên đổi mật khẩu, đồng thời hỗ trợ reset phiên đăng nhập/khóa tạm các tài khoản có dấu hiệu bị lộ lọt credential.",
+        raw_log: "[PORTAL-AUTH-LOG 2026-10-10 14:30:45]\nEVENT: MASS_PASSWORD_COMPROMISE_SUSPECT\nTARGET_SERVICE: fap.t48-edu.vn (Port 443)\nDETECTION: Multiple logins from untrusted external IPs [113.161.42.12, 171.244.18.9]\nDISPATCH_TARGET: All K55, K56, Master and Officer Courses.",
+        correct_actions: ["reset_password", "broadcast_alert"],
+        sop_explanation: "Xử lý sự cố lộ mật khẩu diện rộng theo SOP: Cần thực hiện (1) Khóa/Reset mật khẩu tài khoản bị nghi ngờ xâm phạm, và (2) Phê duyệt phát Thông báo khẩn cấp toàn trường yêu cầu đổi mật khẩu và cảnh báo trang lừa đảo."
+      }
+    ];
+
+    const DEF_EV = {"TICKET-1048":["MAC_ADDRESS"],"TICKET-1049":["powershell"],"TICKET-1050":["untrusted external IPs"]};
+    DEFAULT_TICKETS.forEach(t => t.ev = DEF_EV[t.id]);
+    // Global State
+    let tickets = [];
+    let activeTicketId = null;
+    let playerScore = 0; // Daily score
+    let reputation = 100;
+    let resolvedCount = 0; // Daily resolved
+    let currentFilter = 'all';
+    let slaInterval = null;
+
+    // Career & Progression State (Theo ngày và tuần)
+    let currentDay = 1;     // Ngày trong tuần (1 -> 7)
+    let currentWeek = 1;    // Tuần công tác (1, 2, 3...)
+    let weeklyExp = 0;      // EXP thu được trong tuần hiện tại
+    let totalExp = 0;       // Tổng EXP sự nghiệp
+    let todayStartResolved = 0; // Để tính số ticket làm trong ngày
+    let todayStartExp = 0;      // Để tính EXP kiếm trong ngày
+
+    // Cấp bậc Sĩ quan / Chuyên viên SOC T48 theo Tổng EXP
+    const RANKS = [
+      { minExp: 0, title: "Học viên Trực ban", badge: "badge-rank-1" },
+      { minExp: 500, title: "Hạ sĩ Quan ANM - Tier 1", badge: "badge-rank-2" },
+      { minExp: 1200, title: "Trung sĩ Giám sát SOC", badge: "badge-rank-3" },
+      { minExp: 2200, title: "Thượng sĩ Điều tra Sự cố", badge: "badge-rank-4" },
+      { minExp: 3500, title: "Thiếu úy Chuyên gia NAC/T48", badge: "badge-rank-5" },
+      { minExp: 5000, title: "Trung úy Trực ban Trưởng SOC", badge: "badge-rank-6" }
+    ];
+
+    function getCurrentRank() {
+      let current = RANKS[0];
+      for (const r of RANKS) {
+        if (totalExp >= r.minExp) current = r;
+      }
+      return current;
+    }
+
+    // ==========================================
+    // 2. INITIALIZATION & STORAGE
+    // ==========================================
+    function initApp() {
+      if (localStorage.getItem('t48_ver') !== '2') { localStorage.clear(); localStorage.setItem('t48_ver', '2'); }
+      // Load saved tickets or populate default
+      const savedTickets = localStorage.getItem('t48_tickets');
+      if (savedTickets) {
+        try {
+          tickets = JSON.parse(savedTickets);
+        } catch (e) {
+          tickets = JSON.parse(JSON.stringify(DEFAULT_TICKETS));
+        }
+      } else {
+        tickets = JSON.parse(JSON.stringify(DEFAULT_TICKETS));
+      }
+
+      // Load career & score stats
+      playerScore = parseInt(localStorage.getItem('t48_score') || '0', 10);
+      reputation = parseInt(localStorage.getItem('t48_reputation') || '100', 10);
+      resolvedCount = parseInt(localStorage.getItem('t48_resolved') || '0', 10);
+
+      currentDay = parseInt(localStorage.getItem('t48_day') || '1', 10);
+      currentWeek = parseInt(localStorage.getItem('t48_week') || '1', 10);
+      weeklyExp = parseInt(localStorage.getItem('t48_weekly_exp') || '0', 10);
+      totalExp = parseInt(localStorage.getItem('t48_total_exp') || '0', 10);
+      todayStartResolved = parseInt(localStorage.getItem('t48_today_start_resolved') || '0', 10);
+      todayStartExp = parseInt(localStorage.getItem('t48_today_start_exp') || '0', 10);
+
+      // Select first active ticket
+      if (tickets.length > 0) {
+        activeTicketId = tickets[0].id;
+      }
+
+      updateScoreboard();
+      renderTicketList();
+      renderActiveTicket();
+      startSlaClock();
+      startLiveClock();
+    }
+
+    function saveState() {
+      localStorage.setItem('t48_tickets', JSON.stringify(tickets));
+      localStorage.setItem('t48_score', playerScore.toString());
+      localStorage.setItem('t48_reputation', reputation.toString());
+      localStorage.setItem('t48_resolved', resolvedCount.toString());
+
+      localStorage.setItem('t48_day', currentDay.toString());
+      localStorage.setItem('t48_week', currentWeek.toString());
+      localStorage.setItem('t48_weekly_exp', weeklyExp.toString());
+      localStorage.setItem('t48_total_exp', totalExp.toString());
+      localStorage.setItem('t48_today_start_resolved', todayStartResolved.toString());
+      localStorage.setItem('t48_today_start_exp', todayStartExp.toString());
+    }
+
+    function resetGame() {
+      if (confirm("Bạn có chắc chắn muốn thiết lập lại toàn bộ ca trực và tiến trình nghề nghiệp về Tuần 1 Ngày 1 không?")) {
+        Object.keys(localStorage).filter(k => k.startsWith('t48_') && !['t48_gkey','t48_gmodel','t48_aipool','t48_aisup','t48_ver'].includes(k)).forEach(k => localStorage.removeItem(k));
+        tickets = JSON.parse(JSON.stringify(DEFAULT_TICKETS));
+        playerScore = 0;
+        reputation = 100;
+        resolvedCount = 0;
+        currentDay = 1;
+        currentWeek = 1;
+        weeklyExp = 0;
+        totalExp = 0;
+        todayStartResolved = 0;
+        todayStartExp = 0;
+        activeTicketId = tickets[0].id;
+        updateScoreboard();
+        renderTicketList();
+        renderActiveTicket();
+        showToast('Đã làm mới sự nghiệp về Tuần 1 Ngày 1!', 'info');
+      }
+    }
+
+    // ==========================================
+    // 3. UI RENDERING & TICKETS
+    // ==========================================
+    function renderTicketList() {
+      const container = document.getElementById('ticketList');
+      container.innerHTML = '';
+
+      const filtered = tickets.filter(t => {
+        if (currentFilter === 'all') return true;
+        return t.category === currentFilter;
+      });
+
+      const totalResolved = tickets.filter(t => t.status === 'resolved').length;
+      document.getElementById('ticketCountBadge').textContent = `${totalResolved} / ${tickets.length}`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-slate-500 text-xs font-mono">
+            <i class="fa-solid fa-folder-open text-2xl mb-2 text-slate-600 block"></i>
+            Không có ticket nào trong danh mục này.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(ticket => {
+        const isActive = ticket.id === activeTicketId;
+        const isResolved = ticket.status !== 'open';
+
+        let sevBadge = '';
+        if (ticket.severity === 'critical') {
+          sevBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/40 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold">Nghiêm trọng</span>`;
+        } else if (ticket.severity === 'high') {
+          sevBadge = `<span class="bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold">Cao</span>`;
+        } else if (ticket.severity === 'medium') {
+          sevBadge = `<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold">Trung bình</span>`;
+        } else {
+          sevBadge = `<span class="bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold">Thấp</span>`;
+        }
+
+        let categoryIcon = '';
+        if (ticket.category === 'sec') categoryIcon = '<i class="fa-solid fa-shield-virus text-red-400"></i>';
+        else if (ticket.category === 'mac') categoryIcon = '<i class="fa-solid fa-network-wired text-sky-400"></i>';
+        else categoryIcon = '<i class="fa-solid fa-bullhorn text-amber-400"></i>';
+
+        const card = document.createElement('div');
+        card.className = `p-2.5 rounded-xl border cursor-pointer transition relative ${
+          isActive 
+            ? 'bg-slate-800/90 border-emerald-500/70 shadow-md ring-1 ring-emerald-500/40' 
+            : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
+        } ${isResolved ? 'opacity-65' : ''}`;
+
+        card.onclick = () => selectTicket(ticket.id);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <div class="flex items-center gap-1.5">
+              ${categoryIcon}
+              <span class="font-mono text-[11px] font-bold ${isActive ? 'text-emerald-400' : 'text-sky-400'}">${esc(ticket.id)}</span>
+              ${sevBadge}
+            </div>
+            ${
+              isResolved 
+                ? '<span class="text-emerald-400 text-[10px] font-mono font-bold flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Đã xong</span>' 
+                : `<span class="text-amber-400 text-[10px] font-mono font-semibold flex items-center gap-1"><i class="fa-regular fa-clock"></i> ${formatTime(ticket.sla_seconds)}</span>`
+            }
+          </div>
+          <div class="text-xs font-semibold text-slate-200 leading-snug line-clamp-2">
+            ${esc(ticket.title)}
+          </div>
+          <div class="text-[10px] text-slate-500 mt-1.5 flex items-center justify-between font-mono">
+            <span class="truncate max-w-[170px]">${esc(ticket.source)}</span>
+            <span class="text-[9px] text-slate-600">${esc(ticket.category.toUpperCase())}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function selectTicket(id) {
+      activeTicketId = id;
+      renderTicketList();
+      renderActiveTicket();
+      playBeep(450, 0.05);
+    }
+
+    function renderActiveTicket() {
+      const ticket = tickets.find(t => t.id === activeTicketId);
+      if (!ticket) return;
+
+      document.getElementById('activeTicketCode').textContent = ticket.id;
+      document.getElementById('activeTicketTitle').textContent = ticket.title;
+      
+      // Category & Sev
+      const catMap = { sec: 'An ninh mạng', mac: 'Đăng ký MAC', edu: 'Thông báo Đào tạo' };
+      document.getElementById('activeTicketCategory').textContent = catMap[ticket.category] || 'Sự cố';
+
+      const sevEl = document.getElementById('activeTicketSeverity');
+      if (ticket.severity === 'critical') {
+        sevEl.className = 'text-xs px-2 py-0.5 rounded font-bold font-mono bg-red-600/30 text-red-400 border border-red-500/50';
+        sevEl.textContent = 'Mức: Nghiêm trọng';
+      } else if (ticket.severity === 'high') {
+        sevEl.className = 'text-xs px-2 py-0.5 rounded font-bold font-mono bg-red-500/20 text-red-400 border border-red-500/30';
+        sevEl.textContent = 'Mức: Cao';
+      } else if (ticket.severity === 'medium') {
+        sevEl.className = 'text-xs px-2 py-0.5 rounded font-bold font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        sevEl.textContent = 'Mức: Trung bình';
+      } else {
+        sevEl.className = 'text-xs px-2 py-0.5 rounded font-bold font-mono bg-sky-500/20 text-sky-400 border border-sky-500/30';
+        sevEl.textContent = 'Mức: Thấp';
+      }
+
+      // Icon
+      const iconBox = document.getElementById('activeTicketIcon');
+      if (ticket.category === 'sec') {
+        iconBox.innerHTML = '<i class="fa-solid fa-shield-virus"></i>';
+        iconBox.className = 'w-10 h-10 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 flex items-center justify-center text-lg';
+      } else if (ticket.category === 'mac') {
+        iconBox.innerHTML = '<i class="fa-solid fa-network-wired"></i>';
+        iconBox.className = 'w-10 h-10 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center text-lg';
+      } else {
+        iconBox.innerHTML = '<i class="fa-solid fa-bullhorn"></i>';
+        iconBox.className = 'w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center text-lg';
+      }
+
+      // Countdown
+      const countdownEl = document.getElementById('activeTicketSlaCountdown');
+      if (ticket.status !== 'open') {
+        countdownEl.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-check-circle"></i> ĐÃ HOÀN TẤT</span>';
+      } else {
+        countdownEl.innerHTML = `<i class="fa-solid fa-stopwatch text-xs"></i> <span>${formatTime(ticket.sla_seconds)}</span>`;
+      }
+
+      // Details Tab Content
+      document.getElementById('detailSource').textContent = ticket.source;
+      document.getElementById('detailLocation').textContent = ticket.location;
+      mkClickable(document.getElementById('detailDescription'), ticket.description.split(/\n+|(?<=[.!?])\s+/), false);
+      document.getElementById('detailSrcIp').textContent = ticket.src_ip || 'N/A';
+      document.getElementById('detailMac').textContent = ticket.mac || 'N/A';
+      document.getElementById('detailDevice').textContent = ticket.device || 'N/A';
+
+      // NAC Tab Prep
+      document.getElementById('nacInputMac').value = ticket.mac || '';
+      document.getElementById('bindIpPreview').textContent = ticket.src_ip || '10.48.x.x';
+      document.getElementById('bindMacPreview').textContent = ticket.mac || 'XX:XX:XX:XX:XX:XX';
+      lookupMacOui(ticket.mac);
+
+      // Raw Logs Tab with Auto-Highlighter
+      renderHighlightedLog(ticket.raw_log || 'Không có log đính kèm.');
+
+      // Clear checkboxes for new evaluation
+      resetCheckboxes();
+
+      // Submit Button Status
+      const submitBtn = document.getElementById('btnSubmitResolution');
+      if (ticket.status !== 'open') {
+        submitBtn.disabled = true;
+        submitBtn.className = 'w-full bg-slate-800 text-slate-500 font-bold py-2.5 rounded-lg text-xs md:text-sm cursor-not-allowed border border-slate-700';
+        submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>TICKET NÀY ĐÃ ĐƯỢC XỬ LÝ XONG</span>';
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.className = 'w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-xs md:text-sm shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 transition duration-200 border border-emerald-400/40';
+        submitBtn.innerHTML = '<i class="fa-solid fa-stamp"></i> <span>XÁC NHẬN XỬ LÝ (COMMIT SOP)</span>';
+      }
+    }
+
+    function resetCheckboxes() {
+      selEv = []; renderEvBox();
+      document.querySelectorAll('.sop-action-check').forEach(cb => {
+        cb.checked = false;
+      });
+    }
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(b => {
+        b.className = 'filter-tab px-1.5 py-1 rounded text-center text-slate-400 hover:text-slate-200 transition';
+      });
+      const activeBtn = document.getElementById(`filter-${filter}`);
+      if (activeBtn) {
+        activeBtn.className = 'filter-tab px-1.5 py-1 rounded text-center transition bg-emerald-600 text-white font-semibold';
+      }
+      renderTicketList();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.workspace-tab').forEach(b => {
+        b.className = 'workspace-tab px-3 py-2 rounded-t-lg flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition';
+      });
+
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) targetPane.classList.remove('hidden');
+
+      const targetBtn = document.getElementById(`btn-${tabId}`);
+      if (targetBtn) {
+        targetBtn.className = 'workspace-tab px-3 py-2 rounded-t-lg flex items-center gap-2 border-b-2 border-emerald-400 bg-slate-800 text-emerald-400 font-semibold transition';
+      }
+      playBeep(700, 0.04);
+    }
+
+    // ==========================================
+    // 4. HIGHLIGHTER & LOG VIEWER
+    // ==========================================
+    function copyRawLog() {
+      const ticket = tickets.find(t => t.id === activeTicketId);
+      if (ticket && ticket.raw_log) {
+        navigator.clipboard.writeText(ticket.raw_log).then(() => {
+          showToast('Đã copy Log vào Clipboard!', 'success');
+        });
+      }
+    }
+
+    // ==========================================
+    // 5. NAC / OUI INSPECTION LOGIC
+    // ==========================================
+    function lookupMacOui(customMac) {
+      const mac = (customMac || document.getElementById('nacInputMac').value).trim().toUpperCase();
+      const formatEl = document.getElementById('nacResFormat');
+      const vendorEl = document.getElementById('nacResVendor');
+      const typeEl = document.getElementById('nacResType');
+      const spoofEl = document.getElementById('nacResSpoof');
+
+      if (!mac) {
+        formatEl.textContent = 'Chưa nhập MAC';
+        vendorEl.textContent = 'N/A';
+        return;
+      }
+
+      // Standard MAC Regex: 6 pairs of hex
+      const cleanMac = mac.replace(/[:-]/g, '');
+      const isFormatValid = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/i.test(mac);
+
+      if (!isFormatValid) {
+        formatEl.innerHTML = '<span class="text-red-400 font-bold">Không đúng chuẩn IEEE 802</span>';
+        vendorEl.innerHTML = '<span class="text-slate-500">Không thể xác định OUI</span>';
+        typeEl.textContent = 'N/A';
+        spoofEl.innerHTML = '<span class="text-red-400 font-bold">Cảnh báo: Chuỗi MAC bất thường!</span>';
+        return;
+      }
+
+      formatEl.innerHTML = '<span class="text-emerald-400 font-bold">Chuẩn EUI-48 Hợp lệ</span>';
+
+      // Check first byte for Local Admin / Multicast (Random MAC indicator)
+      const firstByte = parseInt(cleanMac.substring(0, 2), 16);
+      const isLocallyAdministered = (firstByte & 0x02) !== 0;
+      const isMulticast = (firstByte & 0x01) !== 0;
+
+      // Check OUI in DB
+      const ouiPrefix = mac.substring(0, 8);
+      const match = OUI_DATABASE[ouiPrefix];
+
+      if (match) {
+        vendorEl.innerHTML = `<span class="text-amber-300 font-bold">${match.vendor}</span> (${match.type})`;
+      } else {
+        vendorEl.innerHTML = '<span class="text-slate-400">Không nằm trong OUI phổ thông (Vendor Private/Unknown)</span>';
+      }
+
+      if (isMulticast) {
+        typeEl.textContent = 'Multicast Address (Không dùng cho Host cá nhân)';
+      } else if (isLocallyAdministered) {
+        typeEl.innerHTML = '<span class="text-amber-400 font-bold">Locally Administered (Random MAC)</span>';
+      } else {
+        typeEl.textContent = 'Unicast / Globally Unique Hardware MAC';
+      }
+
+      if (isLocallyAdministered || mac.startsWith("00:0C:29") || mac.startsWith("08:00:27")) {
+        spoofEl.innerHTML = '<span class="text-red-400 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Có dấu hiệu Ảo hóa / Random MAC Spoofing</span>';
+      } else {
+        spoofEl.innerHTML = '<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> Phần cứng Vật lý Bình thường</span>';
+      }
+    }
+
+    function pasteCurrentTicketMac() {
+      const ticket = tickets.find(t => t.id === activeTicketId);
+      if (ticket && ticket.mac) {
+        document.getElementById('nacInputMac').value = ticket.mac;
+        lookupMacOui(ticket.mac);
+        showToast(`Đã nạp MAC ${ticket.mac} vào bộ tra cứu`, 'info');
+      }
+    }
+
+    function simulateNacAction(type) {
+      const ticket = tickets.find(t => t.id === activeTicketId);
+      if (!ticket) return;
+      if (type === 'whitelist') {
+        showToast(`[RADIUS MOCK] Đã ghi MAC ${ticket.mac || 'N/A'} vào FreeRADIUS Users Whitelist (VLAN 104)!`, 'success');
+        playBeep(600, 0.1);
+      } else {
+        showToast(`[FIREWALL MOCK] Đã nạp MAC ${ticket.mac || 'N/A'} vào ACL Drop List của Switch/Gateway!`, 'warning');
+        playBeep(350, 0.15);
+      }
+    }
+
+    // ==========================================
+    // 6. TOOLS & BROADCAST NOTIFICATION
+    // ==========================================
+    function dispatchBroadcastNotification() {
+      const title = document.getElementById('notifyTitle').value.trim();
+      const content = document.getElementById('notifyContent').value.trim();
+      const audience = document.getElementById('notifyAudience').options[document.getElementById('notifyAudience').selectedIndex].text;
+
+      if (!title || !content) {
+        showToast('Vui lòng nhập đầy đủ tiêu đề và nội dung thông báo!', 'warning');
+        return;
+      }
+
+      showToast(`Đã phát thông báo khẩn cấp tới: "${audience}" qua SMS Gateway và FAP Portal!`, 'success');
+      playSuccessSound();
+    }
+
+    function decodeTextPayload() {
+      const input = document.getElementById('decodeInput').value.trim();
+      const resultBox = document.getElementById('decodeResult');
+
+      if (!input) {
+        resultBox.innerHTML = '<span class="text-slate-500 italic">Vui lòng nhập chuỗi cần giải mã.</span>';
+        return;
+      }
+
+      try {
+        // Try Base64 then URL decode
+        let decoded = "";
+        try {
+          decoded = atob(input);
+        } catch(e) {
+          decoded = decodeURIComponent(input);
+        }
+        resultBox.textContent = decoded;
+        showToast('Giải mã dữ liệu thành công!', 'info');
+      } catch (err) {
+        resultBox.innerHTML = `<span class="text-red-400">Không thể giải mã: Chuỗi không đúng định dạng Base64/URL.</span>`;
+      }
+    }
+
+    // ==========================================
+    // 7. KỊCH BẢN OFFLINE (không API) · CĂN CỨ · SỰ KIỆN · CA ĐÊM
+    const POOL = [
+      {title:"Giảng viên đăng ký MAC laptop chấm đồ án",category:"mac",severity:"low",source:"ThS. Vũ Mạnh Cường (BM An toàn thông tin)",location:"Nhà Hiệu bộ A1 / T48_FACULTY_SEC",src_ip:"10.48.10.82",mac:"AC:DE:48:33:9A:1C",device:"Dell Latitude 7420 (Windows 11 Pro)",description:"Tôi xin đăng ký laptop cá nhân để chấm đồ án lớp ANM khóa D55. Thiết bị đã cấu hình xác thực 802.1X.",raw_log:"[NAC-FACULTY-AUTH]\nUSER=cuongvm_gv@hocvienan.edu.vn\nMAC=AC:DE:48:33:9A:1C\nVENDOR=Dell Inc.\nVLAN=102 (FACULTY_SEC)\nSTATUS=PENDING_APPROVAL",correct_actions:["whitelist_mac"],ev:["VENDOR=Dell"],sop_explanation:"Thiết bị Dell khớp lời khai, đúng VLAN giảng viên: duyệt Whitelist."},
+      {title:"WAF báo SQL Injection vào Cổng Khảo thí",category:"sec",severity:"critical",source:"WAF ModSecurity",location:"Máy chủ Cổng Khảo thí (VLAN 10)",src_ip:"118.69.192.84",mac:"",device:"Công cụ khai thác tự động (IP ngoài Internet)",description:"WAF ghi nhận chuỗi tham số độc hại gửi liên tục vào form đăng nhập thi trắc nghiệm, nghi nhằm trích xuất CSDL điểm thi.",raw_log:"[WAF-ALERT 08:30:12]\nRULE: 942100 SQL Injection Attack Detected\nPAYLOAD: ' UNION SELECT null, username, password FROM t48_users --\nSRC_IP=118.69.192.84\nSTATUS=500 Internal Error",correct_actions:["block_ip_domain","escalate_tier2"],ev:["UNION SELECT"],sop_explanation:"IP nguồn ở ngoài Internet nên không có MAC/cổng switch để cách ly: chặn IP trên Firewall và chuyển Tier 2 thu thập chứng cứ."},
+      {title:"Mã độc đào coin trong Wi-Fi KTX T4",category:"sec",severity:"high",source:"FortiGate Security Fabric",location:"KTX T4 - Phòng 402",src_ip:"10.48.114.88",mac:"E4:5F:01:A2:33:4F",device:"Linux mining rig",description:"Tường lửa thấy một máy trạm kết nối liên tục ra bên ngoài qua cổng 3333 và quét SMB nội bộ.",raw_log:"[FORTIGATE-TRAFFIC 15:40:11]\nSRC=10.48.114.88 DST=pool.supportxmr.com DPT=3333 STATUS=CONNECTED\nALERT: Outbound CryptoMining traffic\nMAC=E4:5F:01:A2:33:4F\nSMB scan 445 -> 10.48.114.0/24",correct_actions:["blacklist_mac","isolate_host","block_ip_domain","escalate_tier2"],ev:["pool.supportxmr.com"],sop_explanation:"Chặn MAC, cách ly cổng, chặn domain pool trên Firewall và báo Tier 2 xử lý."},
+      {title:"Học viên đăng ký MAC MacBook cho phòng Lab",category:"mac",severity:"low",source:"Học viên Lê Hoàng Nam (B2-D56)",location:"Phòng Lab 3",src_ip:"10.48.50.34",mac:"B4:2E:99:8A:1C:72",device:"MacBook Pro M2",description:"Em xin cấp Wi-Fi Lab An toàn thông tin để làm bài thực hành Mạng nâng cao.",raw_log:"[NAC-PORTAL]\nSTUDENT=lehoangnam_b2d56@hocvienan.edu.vn\nMAC=B4:2E:99:8A:1C:72\nVENDOR=Apple, Inc.\nSSID_TARGET=T48_LAB_SECURITY (VLAN 105)",correct_actions:["whitelist_mac"],ev:["VENDOR=Apple"],sop_explanation:"Phần cứng Apple khớp lời khai, không dấu hiệu giả mạo: duyệt Whitelist."},
+      {title:"Học viên B3-D56 đăng ký MAC laptop Dell cho phòng Lab",category:"mac",severity:"medium",source:"Học viên Ngô Văn Ba (B3-D56)",location:"Phòng Lab 2",src_ip:"10.48.50.71",mac:"00:0C:29:7B:11:90",device:"Khai báo: Dell Inspiron 15",description:"Em đăng ký laptop Dell Inspiron cá nhân để làm bài lab. Em cam kết không sử dụng máy ảo hay công cụ giả lập trên mạng Học viện.",raw_log:"[NAC-PORTAL]\nSTUDENT=ngovanba_b3d56@hocvienan.edu.vn\nMAC=00:0C:29:7B:11:90\nVENDOR=VMware, Inc.\nHOST_NAME=kali-attacker\nSSID_TARGET=T48_LAB_SECURITY",correct_actions:["escalate_tier2"],ev:["không sử dụng máy ảo","VENDOR=VMware"],lie:true,sop_explanation:"Lời khai 'không dùng máy ảo' mâu thuẫn với OUI VMware và hostname kali-attacker: không whitelist, báo cáo để xác minh."},
+      {title:"Giảng viên xin cấp mạng cho điện thoại phục vụ giảng dạy",category:"mac",severity:"low",source:"ThS. Lê Thị Hoa (BM Mạng máy tính)",location:"Phòng giảng viên tầng 3",src_ip:"10.48.10.95",mac:"24:6F:28:5A:C3:E1",device:"Khai báo: iPhone 14",description:"Tôi xin cấp Wi-Fi cho chiếc điện thoại iPhone mới để chiếu bài giảng.",raw_log:"[NAC-FACULTY-AUTH]\nUSER=hoalt_gv@hocvienan.edu.vn\nMAC=24:6F:28:5A:C3:E1\nVENDOR=Espressif Inc.\nHOST_NAME=SMART-COFFEE-MACHINE-V2\nTRAFFIC: 4.1GB upload -> unknown-cloud",correct_actions:["blacklist_mac"],ev:["iPhone mới","SMART-COFFEE"],lie:true,sop_explanation:"Đây là máy pha cà phê IoT (Espressif), không phải iPhone, lại upload 4GB lạ: chặn MAC, không whitelist."},
+      {title:"Học viên báo quên mật khẩu Cổng Đào tạo, xin cấp lại",category:"edu",severity:"high",source:"Học viên Phạm Quốc Việt (B2-D55)",location:"Cổng portal fap.t48-edu.vn",src_ip:"10.48.60.21",mac:"F4:F5:DB:12:34:56",device:"Samsung Galaxy S23",description:"Em quên mật khẩu Cổng Đào tạo nên xin cấp lại. Em chưa từng chia sẻ mật khẩu hay đăng nhập từ nước ngoài.",raw_log:"[PORTAL-AUTH-LOG]\nUSER=phamquocviet_b2d55\nLOGIN_OK ip=185.220.101.7 GEOIP=RU UA=curl/8.4\nLOGIN_OK ip=10.48.60.21 GEOIP=VN",correct_actions:["reset_password"],ev:["đăng nhập từ nước ngoài","GEOIP=RU"],lie:true,sop_explanation:"Log có phiên đăng nhập từ IP nước ngoài dù học viên nói chưa từng: tài khoản đã bị lộ, cần khóa và reset mật khẩu."},
+      {title:"Phòng CNTT yêu cầu thông báo bảo trì Cổng Đào tạo đêm nay",category:"edu",severity:"medium",source:"Phòng CNTT - Trực ban kỹ thuật",location:"Toàn Học viện / portal",src_ip:"10.48.1.15",mac:"AC:DE:48:11:88:23",device:"Server Portal FAP (CentOS)",description:"Cổng Đào tạo bảo trì từ 23h00 đến 02h00 đêm nay. Cần thông báo toàn thể học viên để tránh nộp bài trong khung giờ này.",raw_log:"[CHANGE-MGMT]\nCHANGE_ID=CHG-2210\nMAINTENANCE_WINDOW=23:00-02:00\nAPPROVED_BY=Ban Giám đốc\nIMPACT=Portal unavailable",correct_actions:["broadcast_alert"],ev:["MAINTENANCE_WINDOW"],sop_explanation:"Thay đổi đã được duyệt, ảnh hưởng toàn trường: phát thông báo bảo trì."}
+    ];
+    const getEv = t => (t.ev && t.ev.length) ? t.ev : [t.mac || '@@'];
+    let selEv = [];
+    const rnd = a => a[Math.floor(Math.random() * a.length)];
+    function uid() { let n; do { n = Math.floor(1100 + Math.random() * 8800); } while (tickets.some(t => t.id === 'TICKET-' + n)); return n; }
+    function makeTicket(tpl, night) {
+      const sla = {critical:200, high:240, medium:300, low:360}[tpl.severity] || 300;
+      return {...JSON.parse(JSON.stringify(tpl)), id:'TICKET-' + uid(), status:'open', tries:0, sla_seconds:sla, night:!!night};
+    }
+    function hlLine(raw) {
+      let h = esc(raw);
+      [/\b(SELECT|UNION|INSERT|DELETE|DROP|FROM|WHERE|OR 1=1|CONCAT|XP_CMDSHELL)\b/gi, /\b(powershell|cmd\.exe|eval|exec|bash -i|nc -e|certutil|base64|WScript)\b/gi, /\b(fake-domain|phishing|mal-t48-c2|mimikatz|spoofing|arp poisoning)\b/gi]
+        .forEach(p => h = h.replace(p, m => `<span class="highlight-malicious">${m}</span>`));
+      h = h.replace(/\b(404 Not Found|500 Internal|401 Unauthorized|403 Forbidden|ALERT|CRITICAL|FAIL|DENIED)\b/gi, m => `<span class="highlight-warning">${m}</span>`);
+      return h.replace(/\b([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})\b/g, m => `<span class="highlight-mac">${m}</span>`);
+    }
+    function mkClickable(el, lines, hl) {
+      el.innerHTML = '';
+      lines.forEach(l => {
+        if (!l.trim()) return;
+        const d = document.createElement('div'); d.className = 'evi-line';
+        if (hl) d.innerHTML = hlLine(l); else d.textContent = l;
+        d.onclick = () => toggleEv(l, d); el.appendChild(d);
+      });
+    }
+    function renderHighlightedLog(raw) {
+      const v = document.getElementById('rawLogViewer');
+      if (!raw) { v.innerHTML = '<span class="text-slate-600">// Không có nhật ký thô</span>'; return; }
+      mkClickable(v, raw.split('\n'), true);
+    }
+    function toggleEv(l, d) {
+      const i = selEv.indexOf(l);
+      if (i >= 0) { selEv.splice(i, 1); d.classList.remove('evi-sel'); }
+      else { if (selEv.length >= 2) { showToast('Tối đa 2 căn cứ, hãy bỏ bớt một dòng.', 'warning'); return; } selEv.push(l); d.classList.add('evi-sel'); }
+      playBeep(520, 0.04); renderEvBox();
+    }
+    function renderEvBox() {
+      document.getElementById('evCount').textContent = `${selEv.length}/2`;
+      document.getElementById('evList').innerHTML = selEv.map(l => `<div class="truncate">▸ ${esc(l)}</div>`).join('') || '<div class="text-slate-600 italic">Chưa chọn căn cứ nào</div>';
+    }
+
+    // ---- 8. CHẤM ĐIỂM + BÌNH LUẬN TRỰC BAN TRƯỞNG
+    const C_OK = ["Gọn, đúng, đẹp. Hiếm lắm mới thấy cảnh này.", "Làm tốt lắm. Cà phê hôm nay tôi mời.", "Đúng quy trình. Chỉ tiếc đồng chí không biết khoe."];
+    const C_BAD = {
+      reset_password:"Đồng chí vừa khóa tài khoản của chính Giám đốc. Ông ấy đang đứng sau lưng đồng chí.",
+      blacklist_mac:"Chặn nhầm rồi. Học viên đó vừa nhắn Zalo cho cả khóa: 'Phòng CNTT chặn em!'",
+      isolate_host:"Cổng switch đã tắt, kéo theo 30 máy phòng Lab tắt theo. Chúc mừng, đồng chí vừa tạo ra giờ giải lao.",
+      broadcast_alert:"Thông báo toàn trường đã gửi. 2.000 tin nhắn 'Em có phải đổi mật khẩu không ạ?' đang đổ về.",
+      escalate_tier2:"Tier 2 vừa gọi lại: 'Chuyện này mà cũng báo lên à?'",
+      whitelist_mac:"Whitelist rồi. Vừa mở cổng cho một thiết bị lạ. Hy vọng nó là thiết bị đẹp trai.",
+      block_ip_domain:"Rule Firewall vừa chặn luôn cả Cổng Đào tạo của mình. Đồng chí tự chặn mình."
+    };
+    const C_MISS = "Thiếu bước rồi. Sự cố vẫn còn đó và đang nhìn đồng chí...";
+    function submitTicketResolution() {
+      const t = tickets.find(x => x.id === activeTicketId);
+      if (!t) return;
+      if (t.status !== 'open') { showToast('Ticket này đã đóng!', 'info'); return; }
+      const sel = [...document.querySelectorAll('.sop-action-check:checked')].map(c => c.value);
+      if (!sel.length) { showToast('Chọn ít nhất 1 hành động SOP!', 'warning'); playErrorSound(); return; }
+      if (!selEv.length) { showToast('Chọn ít nhất 1 căn cứ (bấm câu mô tả / dòng log) trước khi Commit!', 'warning'); playErrorSound(); return; }
+      const ok = t.correct_actions || [];
+      const missing = ok.filter(a => !sel.includes(a)), extra = sel.filter(a => !ok.includes(a));
+      const ev = getEv(t), hit = k => selEv.some(l => l.includes(k));
+      const evOk = t.lie ? ev.every(hit) : ev.some(hit);
+      const close = st => { t.status = st; t.closedAt = Date.now(); setTimeout(checkNightDone, 500); };
+      if (!missing.length && !extra.length) {
+        let exp = evOk ? 100 : 50, sc = evOk ? 100 : 40, msg;
+        if (evOk) { msg = `🎖 Trực ban trưởng: "${rnd(C_OK)}"`; if (t.lie) { exp += 30; msg += '\n\n🕵️ Bắt quả tang lời khai gian dối! (+30 EXP)'; } }
+        else msg = `🎖 Trực ban trưởng: "Đúng việc nhưng căn cứ chưa thuyết phục. Sếp hỏi 'sao đồng chí biết?' mà đồng chí chỉ gãi đầu."\n🔎 Căn cứ đúng: ${ev.join(' + ')}`;
+        playerScore += sc; resolvedCount++; weeklyExp += exp; totalExp += exp; reputation = Math.min(100, reputation + 2);
+        close('resolved'); saveState(); updateScoreboard(); renderTicketList(); renderActiveTicket(); playSuccessSound();
+        openFeedbackModal(true, `+${sc} Điểm & +${exp} EXP`, `${msg}\n\n📋 ${t.sop_explanation}\n\nCấp bậc: ${getCurrentRank().title}`);
+      } else {
+        t.tries = (t.tries || 0) + 1;
+        playerScore = Math.max(0, playerScore - 50); reputation = Math.max(10, reputation - 8);
+        let msg = `🎖 Trực ban trưởng: "${extra.length ? (C_BAD[extra[0]] || C_MISS) : C_MISS}"\n\n⚠️ Có ${missing.length + extra.length} thao tác chưa đúng.`;
+        if (t.tries >= 3) { close('failed'); msg += `\n\n⛔ Hết 3 lượt, ticket chuyển kíp khác.\n📋 ${t.sop_explanation}`; }
+        else msg += ` Còn ${3 - t.tries} lượt: đọc kỹ lại mô tả và log.`;
+        saveState(); updateScoreboard(); renderTicketList(); if (t.status !== 'open') renderActiveTicket(); playErrorSound();
+        openFeedbackModal(false, `-50 Điểm KPI (lượt ${t.tries}/3)`, msg);
+      }
+    }
+
+    // ---- C8. SỰ KIỆN NGẪU NHIÊN (kết quả: [lời, EXP, uy tín, giây SLA])
+    const EVENTS = [
+      {t:"📞 Sếp gọi đột xuất", d:`Giám đốc gọi: "Đồng chí ơi, Wi-Fi phòng họp chậm quá, xem giúp tôi cái!"`, o:[
+        {l:"Nghe máy, xử lý ngay", f:() => ["Sếp khen nhiệt tình… rồi mới nhận ra ông quên bật Wi-Fi. (-20s SLA ticket đang mở)", 0, 3, -20]},
+        {l:"Để máy reo", f:() => [`Máy reo 15 hồi. Sếp nhắn: "Tôi sẽ nhớ chuyện này." (-5% uy tín)`, 0, -5, 0]}]},
+      {t:"🚨 Báo động DDoS 2.3 Gbps!", d:"Dashboard đỏ rực: lưu lượng tăng đột biến từ hàng trăm IP nội bộ khóa D55 lúc 23h00.", o:[
+        {l:"Chặn cả dải IP khóa D55", f:() => ["Đã chặn. 500 học viên mất mạng đúng lúc tải đề cương ôn thi, tin nhắn chửi đổ về. (-12% uy tín)", 0, -12, 0]},
+        {l:"Soi log trước khi chặn", f:() => ["Cả khóa đồng loạt tải tài liệu đêm trước kỳ thi. Không phải DDoS, là… ôn thi. (+25 EXP)", 25, 0, 0]}]},
+      {t:`📡 Wi-Fi lạ: "FBI_Surveillance_Van_T3"`, d:"Phát hiện SSID lạ phát tại KTX T3, tín hiệu rất mạnh.", o:[
+        {l:"Dò vị trí và điều tra", f:() => Math.random() < .7 ? [`Phòng 305: học viên đặt tên hotspot cho vui, dán tờ giấy "Wi-Fi miễn phí, đừng hack em". (+20 EXP)`, 20, 0, 0] : ["Lần này là Rogue AP thật, đang bắt gói tin. Bạn gỡ kịp! (+50 EXP)", 50, 0, 0]},
+        {l:"Làm lơ, chắc lại troll", f:() => Math.random() < .7 ? ["Đúng là troll thật. Bạn may mắn. (+5 EXP)", 5, 0, 0] : ["Rogue AP thật, đã hút 40 tài khoản. (-15% uy tín)", 0, -15, 0]}]},
+      {t:"✉️ Email lạ kèm chuỗi bí ẩn", d:"Chuỗi trong thư: Q2h1YyBtdW5nIGJhbiBkYSBiaSBsb3AgQjMgdHJvbGwgPSkp", o:[
+        {l:"Giải mã Base64", f:() => [`Giải mã ra: "${atob('Q2h1YyBtdW5nIGJhbiBkYSBiaSBsb3AgQjMgdHJvbGwgPSkp')}". (+15 EXP)`, 15, 0, 0]},
+        {l:"Xóa thư luôn", f:() => ["Xóa. Bạn sẽ không bao giờ biết lớp B3 đã nhắn gì. (+0 EXP)", 0, 0, 0]}]}
+    ];
+    function modalOpen() { return ['feedbackModal', 'dayReportModal', 'eventModal'].some(i => !document.getElementById(i).classList.contains('hidden')); }
+    function applyEvt([msg, e, r, sl]) {
+      if (e) { weeklyExp = Math.max(0, weeklyExp + e); totalExp = Math.max(0, totalExp + e); }
+      if (r) reputation = Math.max(10, Math.min(100, reputation + r));
+      if (sl) { const t = tickets.find(x => x.id === activeTicketId); if (t && t.status === 'open') t.sla_seconds = Math.max(0, t.sla_seconds + sl); }
+      saveState(); updateScoreboard(); (r < 0 || sl < 0) ? playErrorSound() : playSuccessSound();
+    }
+    function openEventModal(title, body, opts) {
+      const m = document.getElementById('eventModal'), b = document.getElementById('evtBtns');
+      document.getElementById('evtTitle').textContent = title; document.getElementById('evtBody').textContent = body; b.innerHTML = '';
+      const btn = (txt, fn) => { const x = document.createElement('button'); x.className = 'w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg py-2 px-3 text-xs text-left'; x.textContent = txt; x.onclick = fn; b.appendChild(x); };
+      opts.forEach(o => btn(o.l, () => {
+        const r = o.f ? o.f() : null;
+        if (!r) { m.classList.add('hidden'); return; }
+        applyEvt(r); document.getElementById('evtBody').textContent = r[0]; b.innerHTML = '';
+        btn('Đã rõ, tiếp tục ca trực', () => m.classList.add('hidden'));
+      }));
+      m.classList.remove('hidden'); playBeep(880, 0.12, 'square');
+    }
+    setInterval(() => { if (!modalOpen() && Math.random() < 0.4) { const e = rnd(EVENTS); openEventModal(e.t, e.d, e.o); } }, 45000);
+
+    // ---- B7. CA ĐÊM HỖN LOẠN
+    function startNightShift() {
+      if (tickets.some(x => x.night && !x.nightDone)) { showToast('Ca đêm đang diễn ra!', 'warning'); return; }
+      const pick = allPool().sort(() => Math.random() - .5).slice(0, 4).map(p => { const t = makeTicket(p, true); t.title = '[CA ĐÊM] ' + t.title; return t; });
+      tickets = [...pick, ...tickets]; activeTicketId = pick[0].id;
+      saveState(); updateScoreboard(); renderTicketList(); renderActiveTicket();
+      openEventModal('🌙 CA ĐÊM HỖN LOẠN', '4 sự cố nổ cùng lúc, SLA chạy nhanh gấp đôi. Xử lý theo mức độ ưu tiên: nghiêm trọng trước, nhẹ sau. Thưởng EXP theo số ticket xong và thứ tự ưu tiên đúng.', [{l:'Vào ca!'}]);
+    }
+    function checkNightDone() {
+      const nt = tickets.filter(x => x.night && !x.nightDone);
+      if (!nt.length || nt.some(x => x.status === 'open')) return;
+      nt.forEach(x => x.nightDone = true);
+      const W = {critical:4, high:3, medium:2, low:1}, ord = [...nt].sort((a, b) => a.closedAt - b.closedAt);
+      let inv = 0; for (let i = 0; i < ord.length; i++) for (let j = i + 1; j < ord.length; j++) if (W[ord[i].severity] < W[ord[j].severity]) inv++;
+      const solved = nt.filter(x => x.status === 'resolved').length, bonus = solved * 25 + (solved ? Math.max(0, 100 - inv * 35) : 0);
+      const msg = `Xử lý xong ${solved}/${nt.length} ticket. Sai thứ tự ưu tiên: ${inv} cặp. ${inv ? 'Ticket nghiêm trọng bị để sau ticket nhẹ, sếp đang nhìn đấy.' : 'Phân loại ưu tiên chuẩn!'}\nThưởng ca đêm: +${bonus} EXP`;
+      applyEvt([msg, bonus, 0, 0]); openEventModal('🌙 Tổng kết ca đêm', msg, [{l:'Đã rõ'}]);
+    }
+
+    function translateAction(act) {
+      const map = {
+        whitelist_mac: "Duyệt Whitelist MAC",
+        blacklist_mac: "Chặn Blacklist MAC",
+        isolate_host: "Cách ly Cổng Switch / Host",
+        reset_password: "Reset Mật khẩu / Khóa Tài khoản",
+        block_ip_domain: "Chặn IP / Domain Firewall",
+        broadcast_alert: "Phát Thông báo Toàn trường",
+        escalate_tier2: "Báo cáo Lãnh đạo / Chuyển Tier 2"
+      };
+      return map[act] || act;
+    }
+
+    function openFeedbackModal(isSuccess, scoreText, message) {
+      const modal = document.getElementById('feedbackModal');
+      const headerIcon = document.getElementById('feedbackModalIcon');
+      const headerTitle = document.getElementById('feedbackModalTitle');
+      const scoreBadge = document.getElementById('feedbackModalScoreChange');
+      const body = document.getElementById('feedbackModalBody');
+
+      if (isSuccess) {
+        headerIcon.className = 'w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-2xl';
+        headerIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        headerTitle.textContent = 'Quy trình SOP: CHUẨN XÁC';
+        headerTitle.className = 'text-base font-bold text-emerald-400';
+        scoreBadge.textContent = scoreText;
+        scoreBadge.className = 'text-xs font-mono font-bold text-emerald-300';
+      } else {
+        headerIcon.className = 'w-12 h-12 rounded-xl bg-red-500/20 text-red-400 border border-red-500/40 flex items-center justify-center text-2xl';
+        headerIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        headerTitle.textContent = 'Quy trình SOP: CHƯA ĐÚNG';
+        headerTitle.className = 'text-base font-bold text-red-400';
+        scoreBadge.textContent = scoreText;
+        scoreBadge.className = 'text-xs font-mono font-bold text-red-300';
+      }
+
+      body.textContent = message;
+      modal.classList.remove('hidden');
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedbackModal').classList.add('hidden');
+    }
+
+    // ==========================================
+    // TÍNH NĂNG: SANG NGÀY MỚI & TIẾN ĐỘ TUẦN LIỀN MẠCH
+    // ==========================================
+    function advanceNextDay() {
+      // Tính toán kết quả ngày hôm nay
+      const todayResolved = resolvedCount - todayStartResolved;
+      const todayExpGained = totalExp - todayStartExp;
+      const rank = getCurrentRank();
+      const weeklyTarget = 500;
+
+      // Cập nhật thông tin lên Modal Báo Cáo Giao Ban
+      document.getElementById('dayReportSubTitle').textContent = `Tổng kết Ca trực Ngày ${currentDay} - Tuần ${currentWeek}`;
+      document.getElementById('repTicketsResolved').textContent = `${resolvedCount} Ticket (${todayResolved >= 0 ? todayResolved : 0} hôm nay)`;
+      document.getElementById('repExpGained').textContent = `+${todayExpGained >= 0 ? todayExpGained : 0} EXP`;
+      document.getElementById('repReputationVal').textContent = `${reputation}%`;
+      document.getElementById('repRankVal').textContent = rank.title;
+      document.getElementById('repWeekProgressVal').textContent = `${weeklyExp} / ${weeklyTarget} EXP`;
+
+      // Kiểm tra nếu là ngày thứ 7 (kết thúc tuần)
+      const awardBox = document.getElementById('repWeeklyAwardBox');
+      const awardTitle = document.getElementById('repWeeklyAwardTitle');
+      const awardDesc = document.getElementById('repWeeklyAwardDesc');
+
+      if (currentDay === 7) {
+        awardBox.classList.remove('hidden');
+        if (weeklyExp >= weeklyTarget) {
+          awardTitle.textContent = `🎉 XUẤT SẮC ĐẠT CHỈ TIÊU TUẦN ${currentWeek}!`;
+          awardDesc.textContent = `Đồng chí đạt ${weeklyExp}/${weeklyTarget} EXP tuần. Ban Giám đốc T48 ghi nhận thành tích xuất sắc và thăng cấp thi đua cho ca trực!`;
+        } else {
+          awardTitle.textContent = `⚠️ KẾT THÚC TUẦN ${currentWeek} - CẦN CỐ GẮNG!`;
+          awardDesc.textContent = `Đồng chí đạt ${weeklyExp}/${weeklyTarget} EXP. Cần xử lý nhanh và chính xác hơn các ticket tồn đọng trong tuần tới.`;
+        }
+      } else {
+        awardBox.classList.add('hidden');
+      }
+
+      document.getElementById('dayReportModal').classList.remove('hidden');
+      playSuccessSound();
+    }
+
+    function startNextDaySession() {
+      // Đóng modal
+      document.getElementById('dayReportModal').classList.add('hidden');
+
+      // Tăng ngày
+      if (currentDay >= 7) {
+        currentDay = 1;
+        currentWeek += 1;
+        weeklyExp = 0; // Reset EXP tuần mới
+        showToast(`Bắt đầu TUẦN MỚI: Tuần ${currentWeek}! Chúc đồng chí hoàn thành tốt nhiệm vụ!`, 'success');
+      } else {
+        currentDay += 1;
+        showToast(`Bắt đầu Ca Trực Ngày ${currentDay} - Tuần ${currentWeek}!`, 'info');
+      }
+
+      // Reset các chỉ số trong ngày
+      playerScore = 0;
+      const _open = tickets.filter(t => t.status === 'open');
+      if (_open.length) { const pen = Math.min(15, 3 * _open.length); reputation = Math.max(10, reputation - pen); showToast(`${_open.length} ticket tồn đọng: -${pen}% uy tín`, 'warning'); }
+      todayStartResolved = resolvedCount;
+      todayStartExp = totalExp;
+
+      // Sinh tự động 2-3 ticket mới cho ngày mới để game luôn liền mạch
+      spawnNewDayTickets();
+
+      saveState();
+      updateScoreboard();
+      renderTicketList();
+      renderActiveTicket();
+    }
+
+    function spawnNewDayTickets() {
+      const room = Math.max(0, 8 - tickets.filter(t => t.status === 'open').length);
+      const fresh = allPool().sort(() => Math.random() - .5).slice(0, Math.min(2, room)).map(p => { const t = makeTicket(p); t.title = `[NGÀY ${currentDay}] ` + t.title; return t; });
+      tickets = [...fresh, ...tickets];
+      const closed = tickets.filter(t => t.status !== 'open');
+      if (closed.length > 10) { const drop = new Set(closed.slice(10).map(t => t.id)); tickets = tickets.filter(t => !drop.has(t.id)); }
+      activeTicketId = fresh.length ? fresh[0].id : (tickets.find(t => t.id === activeTicketId) ? activeTicketId : (tickets[0] || {}).id);
+    }
+
+    function updateScoreboard() {
+      document.getElementById('kpiScore').textContent = playerScore;
+      document.getElementById('kpiResolved').textContent = resolvedCount;
+      document.getElementById('kpiReputation').textContent = `${reputation}%`;
+      document.getElementById('kpiReputationBar').style.width = `${reputation}%`;
+
+      // Cập nhật Cấp bậc và EXP tuần
+      const currentRank = getCurrentRank();
+      const rankBadge = document.getElementById('rankBadge');
+      const officerRankDisplay = document.getElementById('officerRankDisplay');
+      if (rankBadge) rankBadge.textContent = currentRank.title;
+      if (officerRankDisplay) officerRankDisplay.textContent = currentRank.title;
+
+      // Header Week & Day Display
+      const weekDisp = document.getElementById('currentWeekDisplay');
+      const dayDisp = document.getElementById('currentDayDisplay');
+      if (weekDisp) weekDisp.textContent = `TUẦN ${currentWeek}`;
+      if (dayDisp) dayDisp.textContent = `NGÀY ${currentDay}`;
+
+      // Weekly EXP Bar
+      const weeklyTarget = 500;
+      const expPercent = Math.min(100, Math.round((weeklyExp / weeklyTarget) * 100));
+      const kpiWeekNumber = document.getElementById('kpiWeekNumber');
+      const kpiWeeklyExp = document.getElementById('kpiWeeklyExp');
+      const kpiWeeklyExpBar = document.getElementById('kpiWeeklyExpBar');
+      const kpiDayCount = document.getElementById('kpiDayCount');
+      const kpiTotalExp = document.getElementById('kpiTotalExp');
+
+      if (kpiWeekNumber) kpiWeekNumber.textContent = currentWeek;
+      if (kpiWeeklyExp) kpiWeeklyExp.textContent = weeklyExp;
+      if (kpiWeeklyExpBar) kpiWeeklyExpBar.style.width = `${expPercent}%`;
+      if (kpiDayCount) kpiDayCount.textContent = `Ngày ${currentDay}/7`;
+      if (kpiTotalExp) kpiTotalExp.textContent = totalExp;
+
+      // SLA calculation
+      const _done = tickets.filter(t => t.status !== 'open' || t.breached);
+      const slaRate = _done.length ? Math.round(_done.filter(t => t.status === 'resolved' && !t.breached).length / _done.length * 100) : 100;
+      document.getElementById('kpiSla').textContent = `${slaRate}%`;
+      document.getElementById('kpiSlaBar').style.width = `${slaRate}%`;
+
+      // DEFCON status indicator based on unresolved high/critical tickets
+      const highTickets = tickets.filter(t => t.status === 'open' && (t.severity === 'high' || t.severity === 'critical')).length;
+      const defcon = document.getElementById('defconStatus');
+      if (highTickets >= 2) {
+        defcon.textContent = "LEVEL 2 - CRITICAL";
+        defcon.className = "text-red-400 font-bold animate-pulse";
+      } else if (highTickets === 1) {
+        defcon.textContent = "LEVEL 3 - ELEVATED";
+        defcon.className = "text-amber-400 font-bold";
+      } else {
+        defcon.textContent = "LEVEL 4 - NORMAL";
+        defcon.className = "text-emerald-400 font-bold";
+      }
+    }
+
+    // ==========================================
+    // 9. TIMERS & LIVE CLOCKS
+    // ==========================================
+    function startSlaClock() {
+      if (slaInterval) clearInterval(slaInterval);
+      slaInterval = setInterval(() => {
+        let changed = false;
+        tickets.forEach(t => {
+          if (t.status === 'open' && t.sla_seconds > 0) {
+            t.sla_seconds = Math.max(0, t.sla_seconds - (t.night ? 2 : 1));
+            changed = true;
+            if (t.sla_seconds === 0 && !t.breached) { t.breached = true;
+              // SLA Breach penalty
+              reputation = Math.max(10, reputation - 5);
+              showToast(`Ticket ${t.id} đã vi phạm thời hạn cam kết SLA!`, 'warning');
+            }
+          }
+        });
+        if (changed) {
+          renderTicketList();
+          const cur = tickets.find(t => t.id === activeTicketId);
+          if (cur && cur.status === 'open') {
+            document.getElementById('activeTicketSlaCountdown').innerHTML = 
+              `<i class="fa-solid fa-stopwatch text-xs"></i> <span>${formatTime(cur.sla_seconds)}</span>`;
+          }
+        }
+      }, 1000);
+    }
+
+    function startLiveClock() {
+      setInterval(() => {
+        const now = new Date();
+        document.getElementById('liveClock').textContent = now.toLocaleTimeString('vi-VN');
+      }, 1000);
+    }
+
+    function formatTime(sec) {
+      if (sec <= 0) return '00:00 (Hết giờ)';
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // ==========================================
+    // 10. TOAST NOTIFICATION UTILITY
+    // ==========================================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `p-3 rounded-xl shadow-xl border text-xs font-sans flex items-center gap-2.5 max-w-sm pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
+
+      let icon = '<i class="fa-solid fa-info-circle text-sky-400"></i>';
+      let borderClass = 'border-slate-700 bg-slate-900/95 text-slate-200';
+
+      if (type === 'success') {
+        icon = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+        borderClass = 'border-emerald-600/50 bg-slate-900/95 text-emerald-200';
+      } else if (type === 'warning') {
+        icon = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>';
+        borderClass = 'border-amber-600/50 bg-slate-900/95 text-amber-200';
+      } else if (type === 'error') {
+        icon = '<i class="fa-solid fa-circle-xmark text-red-400"></i>';
+        borderClass = 'border-red-600/50 bg-slate-900/95 text-red-200';
+      }
+
+      toast.className += ` ${borderClass}`;
+      toast.innerHTML = `${icon} <span class="flex-1">${esc(message)}</span>`;
+      container.appendChild(toast);
+
+      // Animate in
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      // Auto dismiss
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // ==========================================
+    // QUẦY HỖ TRỢ IT: học viên chibi, người chơi tự nhập liệu & tạo ticket
+    // ==========================================
+    const SUP = [
+      {name:"Trần Tuấn Anh", cls:"B1-D55", mac:"3C:D9:2B:44:A1:0F", cat:"mac", sev:"low", locKey:"thu vien", ip:"10.48.20.105", device:"Laptop HP ProBook mới mua",
+       say:`Dạ thầy ơi, em là Tuấn Anh lớp B1 khóa D55. Em mới mua laptop HP, muốn vào Wi-Fi Thư viện ạ. MAC em chép trên giấy là 3C-D9-2B-44-A1-0E, à nhầm, đúng là 3C-D9-2B-44-A1-0F!`,
+       log:["VENDOR=Hewlett Packard","DHCP_LEASE=10.48.20.105","ANTIVIRUS=Active"], ev:["VENDOR=Hewlett"], actions:["whitelist_mac"], expl:"Thiết bị HP hợp lệ, học viên khai đúng thông tin: duyệt Whitelist MAC."},
+      {name:"Nguyễn Khánh Linh", cls:"B2-D56", mac:"F4:F5:DB:12:34:56", cat:"edu", sev:"high", locKey:"ktx", ip:"10.48.110.20", device:"Samsung Galaxy S23",
+       say:`Em là Khánh Linh, B2 D56, ở KTX T3. Em bấm link của 'thầy giáo' nhắn Zalo rồi nhập mật khẩu Cổng Đào tạo... giờ có người đăng nhập từ đâu đâu ấy ạ! Điện thoại em MAC là F4-F5-DB-12-34-56.`,
+       log:["LOGIN_OK ip=185.220.101.7 GEOIP=RU","LOGIN_OK ip=10.48.110.20 GEOIP=VN"], ev:["GEOIP=RU"], actions:["reset_password"], expl:"Tài khoản bị lộ sau khi dính phishing, có phiên đăng nhập từ nước ngoài: khóa và reset mật khẩu."},
+      {name:"Phạm Quang Hùng", cls:"B1-D55", mac:"E4:5F:01:A2:33:4F", cat:"sec", sev:"high", locKey:"t4", ip:"10.48.114.88", device:"Máy tính Linux tự lắp",
+       say:`Em tên Phạm Quang Hùng, B1 D55, phòng 402 KTX T4. Máy em nóng như cái bếp, quạt kêu như máy bay cất cánh, mà em chỉ cài cái 'tool tăng FPS miễn phí' thôi à. MAC e4:5f:01:a2:33:4f.`,
+       log:["SRC=10.48.114.88 DST=pool.supportxmr.com DPT=3333","Outbound CryptoMining traffic","SMB scan 445 -> 10.48.114.0/24"], ev:["pool.supportxmr.com"], actions:["isolate_host","block_ip_domain"], expl:"Máy đào coin và quét SMB nội bộ: cách ly cổng và chặn domain mining pool trên Firewall."},
+      {name:"Vũ Ngọc Mai", cls:"B3-D56", mac:"24:6F:28:11:22:33", cat:"sec", sev:"medium", locKey:"lab", ip:"10.48.50.88", device:"Router Wi-Fi tự chế cắm vào cổng Lab",
+       say:`Em là Vũ Ngọc Mai, lớp B3 D56, đang ở phòng Lab 3. Em vừa đổi card mạng nên MAC cũ 08-00-27-AA-BB-CC bỏ rồi, MAC mới là 24-6F-28-11-22-33. Em lỡ cắm cục phát Wi-Fi tự chế vào cổng mạng Lab, giờ cả phòng rớt mạng ạ!`,
+       log:["Rogue DHCP server detected on Gi1/0/12","DHCP_OFFER src=192.168.1.1 (unauthorized)"], ev:["Rogue DHCP"], actions:["isolate_host"], expl:"Thiết bị lạ phát DHCP giả trong phòng Lab: cách ly cổng switch đó để khôi phục mạng."}
+    ];
+    let supCur = null, supTimer = null, supLast = -1, supHair = '#3b2a20', supShirt = '#10b981';
+    function chibi(m, h, sh) {
+      const eye = x => m === 'happy' ? `<path d="M${x-6} 54q6-8 12 0" stroke="#1e293b" stroke-width="3" fill="none" stroke-linecap="round"/>` : `<ellipse cx="${x}" cy="53" rx="5.5" ry="7.5" fill="#1e293b"/><circle cx="${x+2}" cy="50" r="2" fill="#fff"/>`;
+      const brow = m === 'angry' ? '<path d="M30 40l16 5M70 40l-16 5" stroke="#1e293b" stroke-width="2.5"/>' : m === 'worried' ? '<path d="M30 45l16-5M70 45l-16-5" stroke="#1e293b" stroke-width="2.5"/>' : '';
+      const mouth = m === 'happy' ? '<path d="M40 66q10 11 20 0z" fill="#be123c"/>' : m === 'angry' ? '<path d="M42 70q8-7 16 0" stroke="#7f1d1d" stroke-width="2.5" fill="none"/>' : m === 'worried' ? '<path d="M42 70q8-5 16 0" stroke="#7f1d1d" stroke-width="2.5" fill="none"/><path d="M82 36q4 7 0 10q-4-3 0-10z" fill="#38bdf8"/>' : '<path d="M42 67q8 6 16 0" stroke="#7f1d1d" stroke-width="2.5" fill="none"/>';
+      return `<svg viewBox="0 0 100 112" class="w-full h-full"><rect x="26" y="82" width="48" height="30" rx="12" fill="${sh}"/><rect x="42" y="76" width="16" height="10" fill="#f5c9a6"/><ellipse cx="50" cy="52" rx="31" ry="28" fill="#f8d5b5"/><path d="M17 52Q16 12 50 12Q84 12 83 52Q72 30 50 33Q28 30 17 52Z" fill="${h}"/><path d="M17 52Q12 66 20 74Q22 60 24 50ZM83 52Q88 66 80 74Q78 60 76 50Z" fill="${h}"/>${eye(38)}${eye(62)}${brow}<ellipse cx="28" cy="63" rx="5" ry="3" fill="#fb7185" opacity=".5"/><ellipse cx="72" cy="63" rx="5" ry="3" fill="#fb7185" opacity=".5"/>${mouth}</svg>`;
+    }
+    const supDraw = m => document.getElementById('supChibi').innerHTML = chibi(m, supHair, supShirt);
+    const supSay = t => document.getElementById('supBubble').textContent = t;
+    function supToggle() {
+      const b = document.getElementById('supBody'); b.classList.toggle('hidden');
+      document.getElementById('supIc').textContent = b.classList.contains('hidden') ? '▸' : '▾';
+    }
+    function supNext() {
+      clearTimeout(supTimer);
+      if (tickets.filter(t => t.status === 'open').length >= 8) { supSay('(Quầy đang kẹt, xử lý bớt ticket đã. Học viên xếp hàng chờ…)'); supTimer = setTimeout(supNext, 10000); return; }
+      const fresh = AI_SUP.find(x => !x.used);
+      if (fresh) { fresh.used = true; aiSave(); supCur = fresh; }
+      else { const A = [...SUP, ...AI_SUP]; let c; do { c = rnd(A); } while (c === supLast); supCur = c; }
+      supLast = supCur;
+      supHair = rnd(['#3b2a20', '#1e293b', '#7c3aed', '#be123c', '#b45309']); supShirt = rnd(['#10b981', '#0ea5e9', '#f59e0b', '#ec4899']);
+      ['supName', 'supClass', 'supMac', 'supCat', 'supSev', 'supLoc', 'supDesc'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('supForm').classList.remove('hidden'); document.getElementById('supNextBtn').classList.add('hidden');
+      supDraw('worried'); supSay(supCur.say); playBeep(740, 0.1);
+    }
+    function supSubmit() {
+      if (!supCur) return;
+      const v = id => document.getElementById(id).value.trim();
+      const f = {name:v('supName'), cls:v('supClass'), mac:v('supMac'), cat:v('supCat'), sev:v('supSev'), loc:v('supLoc'), desc:v('supDesc')};
+      if (Object.values(f).some(x => !x)) { showToast('Hãy nhập đủ mọi trường, không được bỏ trống!', 'warning'); playErrorSound(); return; }
+      if (f.desc.length < 10) { showToast('Tóm tắt sự cố cần ít nhất 10 ký tự.', 'warning'); return; }
+      const S = supCur;
+      const nz = x => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const L = {cat:{mac:'Đăng ký MAC', sec:'An ninh mạng', edu:'Đào tạo'}, sev:{low:'Thấp', medium:'Trung bình', high:'Cao', critical:'Nghiêm trọng'}};
+      const checks = [
+        ['Họ tên', (nz(S.name).endsWith(nz(f.name)) && nz(f.name).length >= 4), f.name, S.name], ['Lớp', nz(f.cls) === nz(S.cls), f.cls, S.cls],
+        ['MAC', nz(f.mac) === nz(S.mac), f.mac, S.mac], ['Loại sự cố', f.cat === S.cat, L.cat[f.cat], L.cat[S.cat]],
+        ['Mức độ', f.sev === S.sev, L.sev[f.sev], L.sev[S.sev]], ['Vị trí', nz(f.loc).includes(nz(S.locKey)), f.loc, S.locKey]
+      ];
+      const acc = checks.filter(c => c[1]).length, exp = acc * 5;
+      const t = {id:'TICKET-' + uid(), title:'[HELPDESK] ' + f.desc.slice(0, 70), category:f.cat, severity:f.sev, source:`${f.name} (${f.cls})`, location:f.loc,
+        src_ip:S.ip, mac:f.mac.toUpperCase(), device:S.device, description:f.desc,
+        raw_log:`[HELPDESK-INTAKE]\nREPORTER=${f.name}\nCLASS=${f.cls}\nMAC=${f.mac.toUpperCase()}\nLOCATION=${f.loc}\n` + S.log.join('\n'),
+        correct_actions:S.actions, ev:S.ev, sop_explanation:S.expl, status:'open', tries:0, night:false,
+        sla_seconds:({critical:200, high:240, medium:300, low:360})[f.sev]};
+      tickets.unshift(t); activeTicketId = t.id;
+      weeklyExp += exp; totalExp += exp; playerScore += acc * 10;
+      saveState(); updateScoreboard(); renderTicketList(); renderActiveTicket();
+      const mood = acc === 6 ? 'happy' : acc >= 4 ? 'worried' : 'angry';
+      supDraw(mood); supSay(acc === 6 ? 'Nhập chuẩn quá ạ! Em đi học bài đây ✨' : acc >= 4 ? 'Dạ… hình như có chỗ chưa khớp lắm, nhưng em cảm ơn ạ.' : 'Thầy ơi sao tên với số máy em thành thế này?! 😭');
+      document.getElementById('supForm').classList.add('hidden'); document.getElementById('supNextBtn').classList.remove('hidden'); supCur = null;
+      supTimer = setTimeout(supNext, 20000);
+      const bad = checks.filter(c => !c[1]).map(c => `❌ ${c[0]}: bạn nhập "${c[2]}", đúng là "${c[3]}"`).join('\n');
+      openFeedbackModal(acc >= 5, `Nhập liệu ${acc}/6 chính xác · +${exp} EXP`, `Ticket ${t.id} đã vào hàng đợi với đúng dữ liệu bạn nhập (nhập sai thì ticket sai theo: SLA, MAC, phân loại…).\n\n${bad || '✅ Mọi trường đều chính xác!'}`);
+    }
+    window.addEventListener('DOMContentLoaded', () => { supDraw('normal'); supSay('(Đang chờ học viên đến quầy…)'); setTimeout(supNext, 2500); });
+
+    // ==========================================
+    // GEMINI: TỰ SINH VIỆC MỚI (key do người chơi tự nhập, chỉ lưu trong trình duyệt)
+    // ==========================================
+    const ACT = ['whitelist_mac','blacklist_mac','isolate_host','reset_password','block_ip_domain','broadcast_alert','escalate_tier2'];
+    const MACRE = /^([0-9A-F]{2}:){5}[0-9A-F]{2}$/;
+    const THEMES = ['USB lạ cắm vào máy phòng học','brute-force VPN giảng viên','DNS tunneling từ KTX','học viên đăng ký MAC cho thiết bị IoT (loa, đèn, máy chơi game)','trùng MAC giữa hai học viên','email phishing giả mạo Phòng Đào tạo','ransomware đòi tiền trên máy phòng Khảo thí','camera/máy in mạng bị chiếm quyền','rogue AP trong giảng đường','tài khoản giảng viên đăng nhập lúc 3h sáng','thông báo khẩn lịch thi thay đổi','lộ file điểm trên thư mục chia sẻ','học viên dùng VPN lậu vượt tường lửa','máy ảo Kali trong phòng Lab bị phát hiện quét cổng'];
+    const nzG = x => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const ld = k => { try { return JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; } };
+    let AI_POOL = ld('t48_aipool'), AI_SUP = ld('t48_aisup'), aiBusy = false;
+    const allPool = () => [...POOL, ...AI_POOL];
+    function aiSave() { localStorage.setItem('t48_aipool', JSON.stringify(AI_POOL)); localStorage.setItem('t48_aisup', JSON.stringify(AI_SUP)); }
+    function aiUpdate() {
+      const el = document.getElementById('aiStatus'); if (!el) return;
+      el.textContent = localStorage.getItem('t48_gkey') ? `Gemini · kho ${AI_POOL.filter(x => !x.used).length} ticket / ${AI_SUP.filter(x => !x.used).length} học viên mới` : 'AI: chưa có key (đang dùng kịch bản có sẵn)';
+    }
+    function setupGemini() {
+      const k = prompt('AQ.Ab8RN6LcV2RCiZo5J_URQy_zX36GxrZjMGJnMaY2rnbcoVGkIQ', localStorage.getItem('t48_gkey') || '');
+      if (k === null) return;
+      if (k.trim()) localStorage.setItem('t48_gkey', k.trim()); else localStorage.removeItem('t48_gkey');
+      const m = prompt('Tên model Gemini:', localStorage.getItem('t48_gmodel') || 'gemini-2.5-flash');
+      if (m && m.trim()) localStorage.setItem('t48_gmodel', m.trim());
+      aiUpdate();
+      if (k.trim()) { showToast('Đã lưu key. Đang nhờ Gemini sinh việc mới…', 'info'); aiFill('ticket', 3).then(() => aiFill('sup', 3)).then(() => showToast(`Kho AI: ${AI_POOL.length} ticket · ${AI_SUP.length} học viên`, 'success')); }
+    }
+    async function gem(prompt) {
+      const key = localStorage.getItem('t48_gkey'); if (!key) throw new Error('chưa có key');
+      const model = localStorage.getItem('t48_gmodel') || 'gemini-2.5-flash';
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+        method:'POST', headers:{'Content-Type':'application/json', 'x-goog-api-key':key},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}], generationConfig:{responseMimeType:'application/json', temperature:1}})
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      return JSON.parse(d.candidates[0].content.parts[0].text.replace(/^\s*```(json)?|```\s*$/g, '').trim());
+    }
+    function promptTicket(n) {
+      const th = [...THEMES].sort(() => Math.random() - .5).slice(0, n).join('; ');
+      const used = allPool().map(x => x.title).slice(-25).join(' | ');
+      return `Bạn thiết kế kịch bản cho game mô phỏng trực ban SOC/NAC của Học viện An ninh Nhân dân (T48): tiếng Việt, văn phong công an nhân dân, có chút hài hước dở khóc cười đời học viên.
+Tạo ${n} ticket KHÁC NHAU, mỗi ticket một chủ đề: ${th}. Không trùng tiêu đề: ${used}.
+Trả về MẢNG JSON thuần, mỗi phần tử có khóa: title, category ("sec"|"mac"|"edu"), severity ("low"|"medium"|"high"|"critical"), source, location, src_ip, mac (dạng XX:XX:XX:XX:XX:XX hex hoa), device, description (2-3 câu), raw_log (4-8 dòng cách nhau bằng ký tự \\n, có IP/MAC/URL/lệnh thực tế), correct_actions (mảng con của ${JSON.stringify(ACT)}, 1-4 phần tử), ev (mảng), lie (true/false), sop_explanation.
+Quy tắc: (1) KHÔNG đưa đáp án hay hướng dẫn xử lý vào description/raw_log (cấm ACTION_REQUIRED, DIRECTIVE, SOP-). (2) Khoảng 1/3 ticket có lie=true: lời khai trong description MÂU THUẪN với raw_log, khi đó ev = [cụm nguyên văn nằm trong MỘT câu của description, cụm nguyên văn nằm trong MỘT dòng của raw_log]. Ticket lie=false thì ev = [một cụm nguyên văn trong raw_log làm bằng chứng]. (3) IP nguồn ngoài Internet thì không bắt cách ly cổng switch. (4) Hành động đúng phải hợp lý theo nghiệp vụ.`;
+    }
+    function promptSup(n) {
+      return `Bạn thiết kế kịch bản cho game: học viên Học viện An ninh Nhân dân (T48) đến quầy hỗ trợ IT, người chơi phải tự nhập liệu để tạo ticket. Tiếng Việt, hài hước dở khóc cười.
+Tạo ${n} tình huống KHÁC NHAU (ngẫu nhiên về loại: đăng ký MAC, lộ tài khoản, mã độc, thiết bị lạ, thông báo...). Trả về MẢNG JSON thuần, mỗi phần tử có khóa: name (họ tên đầy đủ), cls (dạng B2-D56), mac (XX:XX:XX:XX:XX:XX hex hoa), cat ("sec"|"mac"|"edu"), sev ("low"|"medium"|"high"|"critical"), locKey (từ khóa vị trí ngắn, ví dụ "ktx"), ip (10.48.x.x), device, say, log (mảng 2-4 dòng log hệ thống, KHÔNG chứa MAC và không chứa đáp án), ev (mảng 1 cụm nguyên văn trong một dòng log), actions (mảng con của ${JSON.stringify(ACT)}), expl.
+Quy tắc cho say (lời học viên, khẩu ngữ, 2-4 câu): PHẢI nói rõ họ tên (ít nhất 2 từ cuối), lớp và khóa (ví dụ "lớp B2 khóa D56"), vị trí có chứa locKey, và địa chỉ MAC (đọc kiểu 3C-D9-2B-... ; có thể có bẫy như tự sửa số, MAC cũ và MAC mới, nhưng chỉ suy ra được đúng MỘT MAC hiện tại).`;
+    }
+    function okTicket(x) {
+      try {
+        const str = (k, m) => typeof x[k] === 'string' && x[k].trim() ? x[k].trim().slice(0, m) : null;
+        const t = {title:str('title',120), source:str('source',80), location:str('location',80), src_ip:str('src_ip',40), device:str('device',80), description:str('description',600), raw_log:str('raw_log',900), sop_explanation:str('sop_explanation',500)};
+        if (Object.values(t).some(v => !v)) return null;
+        t.mac = String(x.mac || '').toUpperCase(); if (!MACRE.test(t.mac)) return null;
+        if (!['sec','mac','edu'].includes(x.category) || !['low','medium','high','critical'].includes(x.severity)) return null;
+        t.category = x.category; t.severity = x.severity;
+        t.correct_actions = [...new Set((Array.isArray(x.correct_actions) ? x.correct_actions : []).filter(a => ACT.includes(a)))].slice(0, 4);
+        if (!t.correct_actions.length || t.raw_log.split('\n').length < 3 || /ACTION_REQUIRED|DIRECTIVE|SOP-/i.test(t.raw_log + t.description)) return null;
+        if (allPool().some(p => nzG(p.title) === nzG(t.title))) return null;
+        const keys = (Array.isArray(x.ev) ? x.ev : []).map(String).filter(k => k.length >= 4);
+        const inLog = k => t.raw_log.split('\n').some(l => l.includes(k)), inDesc = k => t.description.split(/\n+|(?<=[.!?])\s+/).some(l => l.includes(k));
+        if (x.lie === true) { const d = keys.find(inDesc), g = keys.find(k => k !== d && inLog(k)); if (!d || !g) return null; t.ev = [d, g]; t.lie = true; }
+        else { const g = keys.find(inLog); if (!g) return null; t.ev = [g]; }
+        return t;
+      } catch (e) { return null; }
+    }
+    function okSup(x) {
+      try {
+        const str = (k, m) => typeof x[k] === 'string' && x[k].trim() ? x[k].trim().slice(0, m) : null;
+        const name = str('name',60), cls = str('cls',12), say = str('say',600), locKey = str('locKey',20), device = str('device',80), expl = str('expl',400), ip = str('ip',20);
+        if (!(name && cls && say && locKey && device && expl && ip)) return null;
+        const mac = String(x.mac || '').toUpperCase(); if (!MACRE.test(mac)) return null;
+        if (!['mac','sec','edu'].includes(x.cat) || !['low','medium','high','critical'].includes(x.sev)) return null;
+        const log = (Array.isArray(x.log) ? x.log : []).filter(l => typeof l === 'string' && l.trim()).map(l => l.slice(0, 160)).slice(0, 5);
+        if (log.length < 2 || /ACTION_REQUIRED|DIRECTIVE|SOP-/i.test(log.join(' '))) return null;
+        const ev = (Array.isArray(x.ev) ? x.ev : []).map(String).filter(k => k.length >= 4 && log.some(l => l.includes(k))).slice(0, 1); if (!ev.length) return null;
+        const actions = [...new Set((Array.isArray(x.actions) ? x.actions : []).filter(a => ACT.includes(a)))].slice(0, 4); if (!actions.length) return null;
+        const ns = nzG(say);
+        if (!ns.includes(nzG(mac)) || !ns.includes(nzG(name.split(/\s+/).slice(-2).join(''))) || !ns.includes(nzG(locKey)) || !cls.split(/[-\s]+/).every(p => ns.includes(nzG(p)))) return null;
+        return {name, cls, say, locKey, device, expl, ip, mac, cat:x.cat, sev:x.sev, log, ev, actions};
+      } catch (e) { return null; }
+    }
+    async function aiFill(kind, n, silent) {
+      if (!localStorage.getItem('t48_gkey') || aiBusy) return 0;
+      aiBusy = true;
+      try {
+        const arr = await gem(kind === 'ticket' ? promptTicket(n) : promptSup(n)); let add = 0;
+        (Array.isArray(arr) ? arr : [arr]).forEach(x => { const v = kind === 'ticket' ? okTicket(x) : okSup(x); if (v) { (kind === 'ticket' ? AI_POOL : AI_SUP).push(v); add++; } });
+        AI_POOL = AI_POOL.slice(-30); AI_SUP = AI_SUP.slice(-30); aiSave();
+        if (!add && !silent) showToast('Gemini trả về dữ liệu chưa hợp lệ, dùng kịch bản có sẵn.', 'warning');
+        return add;
+      } catch (e) { if (!silent) showToast('Gemini lỗi: ' + e.message + '. Dùng kịch bản có sẵn.', 'warning'); return 0; }
+      finally { aiBusy = false; aiUpdate(); }
+    }
+    async function aiTopUp() {
+      if (!localStorage.getItem('t48_gkey')) return;
+      if (AI_POOL.filter(x => !x.used).length < 3) await aiFill('ticket', 3, true);
+      if (AI_SUP.filter(x => !x.used).length < 2) await aiFill('sup', 3, true);
+    }
+    async function generateTicket() {
+      if (tickets.filter(t => t.status === 'open').length >= 8) { showToast('Hộp thư đầy (8 ticket mở). Xử lý bớt trước!', 'warning'); playErrorSound(); return; }
+      const btn = document.getElementById('btnAiGenerate'), sp = document.getElementById('aiLoadingSpinner');
+      let tpl = AI_POOL.find(x => !x.used);
+      if (!tpl && localStorage.getItem('t48_gkey')) {
+        btn.disabled = true; sp.classList.remove('hidden'); showToast('Gemini đang soạn việc mới…', 'info');
+        await aiFill('ticket', 3); tpl = AI_POOL.find(x => !x.used);
+        btn.disabled = false; sp.classList.add('hidden');
+      }
+      if (tpl) { tpl.used = true; aiSave(); aiUpdate(); } else tpl = rnd(POOL);
+      const t = makeTicket(tpl); t.ai = AI_POOL.includes(tpl);
+      tickets.unshift(t); activeTicketId = t.id;
+      saveState(); updateScoreboard(); renderTicketList(); renderActiveTicket(); playBeep(660, 0.1);
+      setTimeout(aiTopUp, 500);
+    }
+    window.addEventListener('DOMContentLoaded', () => { aiUpdate(); setTimeout(aiTopUp, 4000); });
+    setInterval(aiTopUp, 90000);
+
+    // BOOTSTRAP ON LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp();
+    });
+  </script>
+</body>
+</html>

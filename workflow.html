@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mô phỏng workflow PhoBERT: Realtime + Research (Bổ sung Train/Val/Test)</title>
+<style>
+:root{--bg:#fff;--card:#F4F8FD;--ink:#0B2545;--mut:#4A6385;--line:#9DB3D1;--blue:#1565C0;--teal:#00897B;--org:#F57C00;--red:#C62828;--grn:#2E7D32;--navy:#0B2545;--navyink:#fff;--orgt:#FFF4E8;--shadow:rgba(11,37,69,.12);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0D1520;--card:#162233;--ink:#E6EEF9;--mut:#9FB4D0;--line:#4A6385;--blue:#5AA2F0;--teal:#35C2B3;--org:#FFA040;--red:#FF7A70;--grn:#6FD07A;--navy:#1E3A63;--navyink:#fff;--orgt:#2A2218;--shadow:rgba(0,0,0,.4)}}
+:root[data-theme="dark"]{--bg:#0D1520;--card:#162233;--ink:#E6EEF9;--mut:#9FB4D0;--line:#4A6385;--blue:#5AA2F0;--teal:#35C2B3;--org:#FFA040;--red:#FF7A70;--grn:#6FD07A;--navy:#1E3A63;--navyink:#fff;--orgt:#2A2218;--shadow:rgba(0,0,0,.4)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI','Noto Sans',system-ui,Arial,sans-serif;border-top:12px solid var(--org);border-bottom:12px solid var(--org);min-height:100vh}
+.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 28px}
+h1{font-size:clamp(20px,3vw,30px);margin:0 0 4px;letter-spacing:.2px}
+.sub{color:var(--mut);margin:0 0 16px;font-size:15px}
+.bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+button,select{font:inherit;border-radius:10px;border:1.5px solid var(--blue);background:var(--bg);color:var(--ink);padding:7px 14px;cursor:pointer}
+button.p{background:var(--org);border-color:var(--org);color:#1a1000;font-weight:700}
+button:hover{filter:brightness(1.08)}
+label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut)}
+input[type=range]{accent-color:var(--org);width:100px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.st{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.st b{display:block;font-size:22px;color:var(--ink)}
+.st span{font-size:12.5px;color:var(--mut)}
+.meter{height:8px;border-radius:5px;background:var(--line);margin-top:6px;overflow:hidden}
+.meter i{display:block;height:100%;width:90%;background:var(--grn);transition:width .3s,background .3s}
+.dia{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:6px;overflow-x:auto}
+svg{width:100%;height:auto;min-width:900px;display:block}
+.edge{fill:none;stroke:var(--line);stroke-width:2.2}
+.edge.d{stroke-dasharray:6 5}
+.nd{cursor:pointer}
+.nd rect{stroke-width:2.2;transition:all .2s;filter:drop-shadow(0 2px 3px var(--shadow))}
+.nd text{pointer-events:none}
+.t1{font-size:18px;font-weight:700;text-anchor:middle}
+.t2{font-size:14px;text-anchor:middle}
+.n-in rect{fill:var(--card);stroke:var(--blue)} .n-in .t1{fill:var(--ink)} .n-in .t2{fill:var(--mut)}
+.n-rt rect{fill:var(--navy);stroke:var(--navy)} .n-rt text{fill:var(--navyink)}
+.n-rs rect{fill:var(--card);stroke:var(--teal)} .n-rs .t1{fill:var(--ink)} .n-rs .t2{fill:var(--mut)}
+.n-ev rect{fill:var(--orgt);stroke:var(--org)} .n-ev .t1{fill:var(--ink)} .n-ev .t2{fill:var(--mut)}
+.n-bad rect{fill:var(--card);stroke:var(--red)} .n-bad .t1{fill:var(--red)} .n-bad .t2{fill:var(--mut)}
+.nd.on rect:first-child{stroke:var(--org);stroke-width:5}
+.nd.sel rect:first-child{stroke-dasharray:5 3}
+.lb{font-size:15px;font-weight:700}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:760px){.row{grid-template-columns:1fr}}
+.pn{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-height:140px}
+.pn h3{margin:0 0 6px;font-size:16px}
+.pn p{margin:0;color:var(--mut);font-size:14.5px;line-height:1.5}
+#log{list-style:none;margin:0;padding:0;font-size:13.5px;max-height:150px;overflow:auto}
+#log li{padding:3px 0;border-bottom:1px dashed var(--line);color:var(--mut)}
+#log li b{color:var(--ink)}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mut);margin-top:8px}
+.lg i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.n-ok rect{fill:var(--card);stroke:var(--grn)} .n-ok .t1{fill:var(--grn)} .n-ok .t2{fill:var(--mut)}
+.edge.o{stroke:var(--org);stroke-width:4}.edge.t{stroke:var(--teal);stroke-dasharray:8 6}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Huấn luyện – API – Dashboard dò quét tin giả</h1>
+<p class="sub">Dữ liệu được chia tập (Train/Val/Test) trước khi huấn luyện ra AI. Dashboard gọi API dò quét. Khi xác nhận kết thúc đợt, dữ liệu quay lại bước chia tập & huấn luyện mới.</p>
+
+<div class="bar">
+  <button class="p" id="play">▶ Chạy mô phỏng</button>
+  <button id="endB">Kết thúc đợt ngay</button>
+  <button id="reset">Đặt lại</button>
+  <label>Tốc độ <input type="range" id="spd" min="0.5" max="3" step="0.5" value="1"></label>
+  <label>Tỉ lệ tin giả <input type="range" id="fr" min="0.1" max="0.6" step="0.1" value="0.3"></label>
+  <label>Chia tập <select id="spRatio"><option>70/15/15</option><option selected>80/10/10</option><option>90/5/5</option></select></label>
+  <label>Cỡ đợt <select id="bs"><option>8</option><option selected>12</option><option>20</option></select></label>
+</div>
+
+<div class="stats">
+  <div class="st"><b id="sScan">0/12</b><span>Bài quét trong đợt</span><div class="meter"><i id="mScan" style="width:0;background:var(--blue)"></i></div></div>
+  <div class="st"><b id="sFake">0</b><span>Tin giả phát hiện</span></div>
+  <div class="st"><b id="sAcc">86%</b><span>Độ chính xác API</span><div class="meter"><i id="mAcc"></i></div></div>
+  <div class="st"><b id="sVer">–</b><span>Model đang chạy</span></div>
+  <div class="st"><b id="sBat">0</b><span>Đợt đã xác nhận</span></div>
+  <div class="st"><b id="sGold">0 / 0</b><span>Gold: công khai/nội bộ</span></div>
+</div>
+
+<div class="dia">
+<svg id="svg" viewBox="0 110 1600 720" role="img" aria-label="Sơ đồ workflow">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8AA0BD"/></marker>
+    <marker id="ahO" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#F57C00"/></marker>
+    <marker id="ahT" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#00897B"/></marker>
+  </defs>
+  <g id="edges"></g><g id="nodes"></g><g id="pk"></g>
+  <text x="1298" y="322" class="lb" fill="var(--mut)" text-anchor="end">Gửi bài viết</text>
+  <text x="1442" y="322" class="lb" fill="var(--mut)">Kết quả</text>
+  <text x="1129" y="464" class="lb" fill="var(--mut)" text-anchor="middle" font-size="13">dò quét</text>
+  <text x="1358" y="615" class="lb" fill="var(--mut)">Kết thúc đợt</text>
+  <text x="420" y="440" class="lb" fill="var(--org)">Vòng lặp chính:</text>
+  <text x="420" y="462" class="lb" fill="var(--org)">chia tập (Test/Train)</text>
+  <text x="420" y="484" class="lb" fill="var(--org)">và huấn luyện lại</text>
+  <text x="600" y="806" class="lb" fill="var(--teal)" text-anchor="middle">Nhánh phụ: lọc Gold Data từ tập đã xác nhận</text>
+</svg>
+</div>
+<div class="lg">
+  <span><i style="background:#1565C0"></i>Bài viết dò quét</span>
+  <span><i style="background:#00897B"></i>Kết quả API / nhánh phụ Gold</span>
+  <span><i style="background:#2E7D32"></i>Chuyên gia xác nhận</span>
+  <span><i style="background:#F57C00"></i>Dữ liệu cả đợt → huấn luyện lại</span>
+</div>
+
+<div class="row">
+  <div class="pn"><h3 id="ih">Nhấn vào một khối để xem vai trò</h3><p id="ib">Bấm “Chạy mô phỏng” để bắt đầu luồng: dữ liệu sẽ được chia tập (Train/Val/Test), huấn luyện ra AI và chạy API. Sau đó Dashboard sẽ tự động quét bài.</p></div>
+  <div class="pn"><h3>Nhật ký</h3><ul id="log"></ul></div>
+</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const N={ // [cx,cy,w,h,title,sub,cls,desc,raw]
+ old:[140,195,200,110,'DỮ LIỆU CŨ','Dữ liệu lịch sử','n-in','Dữ liệu lịch sử đã gán nhãn, dùng để huấn luyện lần đầu.'],
+ split:[380,195,200,110,'CHIA DỮ LIỆU','Train / Val / Test','n-rs','Tách dữ liệu thành các tập Huấn luyện (Train), Xác thực (Validation) và Kiểm thử (Test).'],
+ train:[680,195,300,110,'HUẤN LUYỆN','Fine-tune PhoBERT','n-ev','Train mô hình bằng tập Train, tinh chỉnh qua tập Val và đánh giá bằng tập Test.'],
+ ai:[1010,195,280,110,'SẢN PHẨM AI','Mô hình phân loại','n-rt','Mô hình đã huấn luyện: phân loại tin giả và tính mức độ cho chủ thể.'],
+ api:[1380,195,320,110,'API','FastAPI · nhãn + điểm','n-rt','API đóng gói mô hình. Dashboard gửi bài viết, API trả nhãn + điểm đánh giá.'],
+ mxh:[950,475,300,90,'MẠNG XÃ HỘI (MXH)','Facebook / YouTube…','n-in','Nguồn bài viết công khai mà Dashboard dò quét.'],
+ confirm:[1345,710,370,120,'CHUYÊN GIA XÁC NHẬN','Xác nhận khi kết thúc đợt','n-ok','Chuyên gia xác nhận kết quả của cả đợt khi kết thúc.'],
+ batch:[940,710,320,120,'TẬP DỮ LIỆU CẢ ĐỢT','Toàn bộ bài viết đã xác nhận','n-ev','Toàn bộ bài viết + nhãn đã xác nhận của đợt. Đi vào chia tập lại; một phần (Gold) đi nhánh phụ.'],
+ dash:[1345,475,370,190,'','','n-raw','Dashboard gọi API để dò quét MXH, phát hiện tin giả và đánh giá mức độ theo chủ thể (Nhà nước, Doanh nghiệp, Cá nhân/KOLs).',
+ `<rect x="1160" y="380" width="370" height="190" rx="14" fill="var(--card)" stroke="var(--blue)" stroke-width="2.5"/><path d="M1160 394a14 14 0 0 1 14-14h342a14 14 0 0 1 14 14v26h-370z" fill="var(--blue)"/>
+ <text class="t1" x="1345" y="407" style="fill:#fff;font-size:19px">DASHBOARD</text>
+ <rect x="1180" y="432" width="330" height="58" rx="10" fill="var(--bg)" stroke="var(--red)"/><text class="t1" x="1345" y="456" style="fill:var(--red);font-size:16px">Dò quét MXH → phát hiện tin giả</text><text class="t2" id="d1" x="1345" y="478" style="fill:var(--mut);font-size:13px">Chưa quét</text>
+ <rect x="1180" y="500" width="330" height="58" rx="10" fill="var(--bg)" stroke="var(--teal)"/><text class="t1" x="1345" y="524" style="fill:var(--teal);font-size:16px">Đánh giá mức độ theo chủ thể</text><text class="t2" id="d2" x="1345" y="546" style="fill:var(--mut);font-size:13px">Nhà nước · Doanh nghiệp · Cá nhân/KOLs</text>`],
+ gold:[270,707,420,135,'','','n-raw','Nhánh phụ: Gold Data đã xác nhận, chỉ công khai 50% mỗi tháng (Open Dataset). Không nằm trên vòng lặp huấn luyện chính.',
+ `<rect x="60" y="640" width="420" height="135" rx="14" fill="var(--bg)" stroke="var(--teal)" stroke-width="2.5" stroke-dasharray="8 5"/>
+ <text class="t1" x="270" y="674" style="fill:var(--teal);font-size:18px">NHÁNH PHỤ · GOLD DATA</text><text class="t2" x="270" y="698" style="fill:var(--mut);font-size:14px">Dữ liệu chuẩn, chỉ công khai 50% mỗi tháng</text>
+ <rect x="85" y="716" width="370" height="26" rx="13" fill="var(--line)" opacity=".5"/><rect x="85" y="716" width="185" height="26" rx="13" fill="var(--teal)"/><rect x="200" y="716" width="70" height="26" fill="var(--teal)"/>
+ <text class="t2" id="gp" x="177" y="734" style="fill:#fff;font-weight:700;font-size:13px">50% công khai</text><text class="t2" id="gi" x="363" y="734" style="fill:var(--mut);font-size:13px">50% nội bộ</text>
+ <text class="t2" x="270" y="762" style="fill:var(--mut);font-size:12.5px">Phát hành mở (Open Dataset)</text>`]
+};
+const E={ // from,to,path,type
+ a1:['old','split','M240,195H280'],
+ a1_5:['split','train','M480,195H530'],
+ a2:['train','ai','M830,195H870'],
+ a3:['ai','api','M1150,195H1220'],
+ a4:['dash','api','M1310,377V253'],
+ a5:['api','dash','M1430,253V380'],
+ a6:['mxh','dash','M1100,475H1157'],
+ a7:['dash','confirm','M1345,570V647'],
+ a8:['confirm','batch','M1160,710H1103'],
+ a9:['batch','split','M780,710H380V254','o'],
+ a10:['batch','gold','M940,770V815H270V780','t']
+};
+const $=id=>document.getElementById(id);
+const nodeEl={},pathEl={};
+for(const [id,[,,d,ty]] of Object.entries(E)){
+ const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('class','edge'+(ty?' '+ty:''));
+ p.setAttribute('marker-end',ty==='o'?'url(#ahO)':ty==='t'?'url(#ahT)':'url(#ah)');$('edges').appendChild(p);pathEl[id]=p;
+}
+let sel=null;
+for(const [id,[x,y,w,h,t,sb,c,desc,raw]] of Object.entries(N)){
+ const g=document.createElementNS(NS,'g');g.setAttribute('class','nd '+c);
+ g.innerHTML=raw||`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="14"/><text class="t1" x="${x}" y="${y-4}">${t}</text><text class="t2" x="${x}" y="${y+24}">${sb}</text>`;
+ g.onclick=()=>{if(sel)nodeEl[sel].classList.remove('sel');sel=id;g.classList.add('sel');$('ih').textContent=t||(id==='dash'?'DASHBOARD':'NHÁNH PHỤ · GOLD DATA');$('ib').textContent=desc};$('nodes').appendChild(g);nodeEl[id]=g;
+}
+const SUBJ=['Nhà nước','Doanh nghiệp','Cá nhân/KOLs'];
+const S0=()=>({run:false,init:false,ready:false,batch:0,total:0,fake:0,acc:.86,ver:0,batches:0,retr:0,pub:0,int:0,risk:[0,0,0]});
+let S=S0();const pk=[];let last=0,timer=null,tm=null;
+const SPD=()=>+$('spd').value;
+function flash(id){const e=nodeEl[id];e.classList.add('on');setTimeout(()=>e.classList.remove('on'),550)}
+function hop(eid,color,cb){
+ const p=pathEl[eid],c=document.createElementNS(NS,'circle');
+ c.setAttribute('r',9);c.setAttribute('fill',color);c.setAttribute('stroke','#fff');c.setAttribute('stroke-width',2);$('pk').appendChild(c);
+ pk.push({p,len:p.getTotalLength(),d:0,c,cb});
+}
+function go(ids,color,done){const [f,...r]=ids;hop(f,color,()=>{flash(E[f][1]);r.length?go(r,color,done):done&&done()})}
+function frame(t){
+ const dt=Math.min(.05,(t-last)/1000||0);last=t;
+ if(S.run){for(let i=pk.length-1;i>=0;i--){const k=pk[i];k.d+=dt*380*SPD();
+  const pt=k.p.getPointAtLength(Math.min(k.d,k.len));k.c.setAttribute('cx',pt.x);k.c.setAttribute('cy',pt.y);
+  if(k.d>=k.len){k.c.remove();pk.splice(i,1);k.cb()}}}
+ requestAnimationFrame(frame);
+}
+function log(m){const li=document.createElement('li');li.innerHTML=m;const u=$('log');u.prepend(li);while(u.children.length>40)u.lastChild.remove()}
+const sc=n=>Math.min(100,n*12);
+function ui(){
+ const bs=+$('bs').value;$('sScan').textContent=S.batch+'/'+bs;$('mScan').style.width=Math.min(100,S.batch/bs*100)+'\%';$('sFake').textContent=S.fake;
+ const a=Math.round(S.acc*100);$('sAcc').textContent=a+'%';const m=$('mAcc');m.style.width=a+'\%';m.style.background=a>=85?'var(--grn)':a>=75?'var(--org)':'var(--red)';$('sVer').textContent=S.ver?'v'+S.ver:'–';$('sBat').textContent=S.batches+' / '+S.retr;$('sGold').textContent=S.pub+' / '+S.int;
+ nodeEl.split.querySelector('.t2').textContent='Tỉ lệ: '+$('spRatio').value;
+ nodeEl.ai.querySelector('.t2').textContent=S.ver?'Mô hình v'+S.ver:'Mô hình phân loại';
+ nodeEl.api.querySelector('.t2').textContent=S.ver?'FastAPI · model v'+S.ver:'FastAPI · nhãn + điểm';
+ $('d1').textContent=S.total?'Đã quét '+S.total+' bài · '+S.fake+' tin giả':'Chưa quét';
+ $('d2').textContent=S.total?'Nhà nước '+sc(S.risk[0])+' · DN '+sc(S.risk[1])+' · KOLs '+sc(S.risk[2]):'Nhà nước · Doanh nghiệp · Cá nhân/KOLs';
+ $('gp').textContent=S.pub?'Công khai '+S.pub+' mẫu':'50% công khai';$('gi').textContent=S.int?'Nội bộ '+S.int+' mẫu':'50% nội bộ';
+}
+function init(){
+ S.init=true;log('Dữ liệu cũ → <b>chia tập (Train/Val/Test)</b> → huấn luyện → AI → API');
+ go(['a1','a1_5','a2','a3'],'#F57C00',()=>{S.ready=true;S.ver=1;ui();log('API sẵn sàng (model v1). Dashboard bắt đầu <b>dò quét MXH</b>')});
+}
+function scan(){
+ go(['a6'],'#1565C0',()=>go(['a4'],'#1565C0',()=>{flash('ai');go(['a5'],'#00897B',result)}));
+}
+function result(){
+ S.batch++;S.total++;S.acc=Math.max(.55,S.acc-.004*+$('drift').value);
+ if(Math.random()<+$('fr').value){S.fake++;const k=Math.floor(Math.random()*3);S.risk[k]++;log('Phát hiện <b style="color:var(--red)">tin giả</b> · tác động tới <b>'+SUBJ[k]+'</b>')}
+ ui();if(S.batch>=+$('bs').value)endBatch();
+}
+function endBatch(){
+ if(S.batch<1||!S.ready)return;const n=S.batch;S.batch=0;ui();
+ log('Kết thúc đợt ('+n+' bài) → chuyên gia xác nhận');
+ go(['a7','a8'],'#2E7D32',()=>{S.batches++;ui();log('Đã xác nhận. Cả đợt → <b>chia tập & huấn luyện lại</b>; Gold Data → nhánh phụ');
+  go(['a9'],'#F57C00',()=>{
+      flash('split'); 
+      go(['a1_5'],'#F57C00',()=>retrain());
+  });
+  go(['a10'],'#00897B',()=>{const h=Math.floor(n/2);S.pub+=h;S.int+=n-h;ui();log('Gold Data: công khai <b>'+h+'/'+n+'</b> mẫu (50%)')});
+ });
+}
+function retrain(){
+ S.retr++;ui();log('Huấn luyện lại bằng dữ liệu tập Train và Valid. Đánh giá bằng Test.');
+ clearTimeout(tm);tm=setTimeout(()=>{S.ver++;S.acc=Math.min(.97,S.acc+.05);ui();flash('ai');flash('api');log('API chuyển sang <b>model v'+S.ver+'</b>')},2200/SPD());
+}
+function spawn(){if(S.run&&S.ready)scan();timer=setTimeout(spawn,1300/SPD())}
+$('play').onclick=()=>{S.run=!S.run;$('play').textContent=S.run?'⏸ Tạm dừng':'▶ Chạy mô phỏng';if(S.run){if(!S.init)init();if(!timer)spawn()}};
+$('endB').onclick=()=>{if(S.run)endBatch()};$('bs').onchange=ui;
+$('spRatio').onchange=ui;
+$('reset').onclick=()=>{pk.splice(0).forEach(k=>k.c.remove());clearTimeout(tm);S=S0();$('play').textContent='▶ Chạy mô phỏng';$('log').innerHTML='';ui()};
+ui();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
