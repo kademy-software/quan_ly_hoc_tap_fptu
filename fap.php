@@ -50,7 +50,7 @@ include __DIR__ . '/includes/header.php';
                     </select>
                 </td>
                 <td><?= htmlspecialchars($f['note'] ?: '—') ?></td>
-                <td><button class="icon-btn" onclick="deleteFap(<?= $f['id'] ?>)">🗑️</button></td>
+                <td><button class="icon-btn" title="Xóa" aria-label="Xóa đơn FAP" onclick="deleteFap(<?= $f['id'] ?>)"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td>
             </tr>
         <?php endforeach; ?>
         </tbody>

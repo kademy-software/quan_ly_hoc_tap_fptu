@@ -39,7 +39,7 @@ include __DIR__ . '/includes/header.php';
         <div class="form-row"><label>Mã số sinh viên</label><input value="<?= htmlspecialchars($student['student_code']) ?>" disabled></div>
         <div class="form-row"><label>Ngành học</label><input value="<?= htmlspecialchars($student['major']) ?>" disabled></div>
         <div class="form-row"><label>Email</label><input value="<?= htmlspecialchars($student['email']) ?>" disabled></div>
-        <a href="logout.php" class="btn btn-danger" style="display:block; text-align:center;">Đăng xuất</a>
+        <a href="logout.php" class="btn btn-danger" style="display:block; text-align:center;"><i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i> Đăng xuất</a>
     </div>
 
     <div class="card">
@@ -49,7 +49,7 @@ include __DIR__ . '/includes/header.php';
             <div class="form-row"><label>Mật khẩu hiện tại</label><input type="password" name="current_password" required></div>
             <div class="form-row"><label>Mật khẩu mới</label><input type="password" name="new_password" required></div>
             <div class="form-row"><label>Xác nhận mật khẩu mới</label><input type="password" name="confirm_password" required></div>
-            <button type="submit" class="btn btn-accent" style="width:100%">Cập nhật mật khẩu</button>
+            <button type="submit" class="btn btn-accent" style="width:100%"><i class="fa-solid fa-key" aria-hidden="true"></i> Cập nhật mật khẩu</button>
         </form>
     </div>
 </div>

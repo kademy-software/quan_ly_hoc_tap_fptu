@@ -1,0 +1,421 @@
+/* theme.css — Redesign Light Mode cho QLHT theo SaaS Dashboard tiêu chuẩn hiện đại */
+
+/* Biến phụ dùng chung cho dark mode (mặc định của style.css) */
+:root {
+    --card-bg: var(--bg-panel);
+    --line: rgba(255,255,255,.12);
+    --surface: rgba(255,255,255,.06);
+    --surface-2: rgba(0,0,0,.25);
+    --card-shadow: none;
+    --border-hover: #3b4759;
+}
+
+/* ==========================================================================
+   LIGHT MODE DESIGN SYSTEM
+   ========================================================================== */
+html[data-theme="light"] {
+    /* Màu nền & Bề mặt */
+    --bg: #F5F7FB;
+    --bg-panel: #FFFFFF;
+    --bg-panel-2: #F8FAFC;
+
+    /* Đường kẻ & Viền */
+    --border: #E2E8F0;
+    --border-hover: #CBD5E1;
+    --line: #E2E8F0;
+    --surface: #F8FAFC;
+    --surface-2: #FFFFFF;
+
+    /* Văn bản */
+    --text: #172033;
+    --text-dim: #64748B;
+
+    /* Màu thương hiệu & Chức năng */
+    --accent: #2563EB;          /* Primary Blue */
+    --accent-dark: #1D4ED8;
+    --accent-light: rgba(37, 99, 235, 0.08);
+
+    --blue: #2563EB;
+    --red: #B91C1C;             /* Danger */
+    --orange: #B45309;          /* Warning */
+    --green: #15803D;           /* Success */
+    --purple: #7C3AED;
+    --pink: #DB2777;
+
+    --radius: 10px;
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* ---------- 1. Layout & Khung nền ---------- */
+html[data-theme="light"] body {
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme="light"] .topbar {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+html[data-theme="light"] .topbar .brand .logo {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+html[data-theme="light"] .topbar nav a,
+html[data-theme="light"] .topbar nav .nav-drop-btn {
+    color: var(--text-dim);
+}
+
+html[data-theme="light"] .topbar nav a:hover,
+html[data-theme="light"] .topbar nav .nav-drop-btn:hover {
+    background: #F1F5F9;
+    color: var(--text);
+}
+
+html[data-theme="light"] .topbar nav a.active,
+html[data-theme="light"] .topbar nav .nav-drop-btn.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 700;
+}
+
+html[data-theme="light"] .nav-sep {
+    background: var(--border);
+}
+
+html[data-theme="light"] .nav-dropdown-menu {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .nav-dropdown-menu a {
+    color: var(--text);
+}
+
+html[data-theme="light"] .nav-dropdown-menu a:hover,
+html[data-theme="light"] .nav-dropdown-menu a.active {
+    background: #F8FAFC;
+    color: var(--accent);
+}
+
+html[data-theme="light"] .stat-pill {
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    color: var(--text);
+    font-size: 14px;
+}
+
+html[data-theme="light"] .avatar {
+    background: var(--accent);
+    color: #FFFFFF;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+}
+
+/* ---------- 2. Thẻ Card & Banner ---------- */
+html[data-theme="light"] .card {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+}
+
+html[data-theme="light"] .hero-banner {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+}
+
+html[data-theme="light"] .hero-banner h1 {
+    color: var(--text);
+}
+
+html[data-theme="light"] .hero-banner p {
+    color: var(--text-dim);
+}
+
+html[data-theme="light"] .online-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+}
+
+/* ---------- 3. Bảng dữ liệu (Table) ---------- */
+html[data-theme="light"] table {
+    border-collapse: collapse;
+}
+
+html[data-theme="light"] th {
+    background: #F8FAFC;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 12px 14px;
+}
+
+html[data-theme="light"] td {
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-size: 15px;
+    padding: 12px 14px;
+}
+
+html[data-theme="light"] tr:hover td {
+    background: #F8FAFC;
+}
+
+/* ---------- 4. Nút bấm (Buttons) ---------- */
+html[data-theme="light"] .btn {
+    font-weight: 600;
+    transition: all .15s ease;
+}
+
+html[data-theme="light"] .btn-accent {
+    background: var(--accent);
+    color: #FFFFFF;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+
+html[data-theme="light"] .btn-accent:hover {
+    background: var(--accent-dark);
+    color: #FFFFFF;
+}
+
+html[data-theme="light"] .btn-outline {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+
+html[data-theme="light"] .btn-outline:hover {
+    background: #F8FAFC;
+    border-color: var(--border-hover);
+    color: var(--accent);
+}
+
+html[data-theme="light"] .btn-danger {
+    background: var(--red);
+    color: #FFFFFF;
+    border: 1px solid transparent;
+}
+
+html[data-theme="light"] .btn-danger:hover {
+    background: #991B1B;
+}
+
+html[data-theme="light"] .icon-btn {
+    color: var(--text-dim);
+}
+
+html[data-theme="light"] .icon-btn:hover {
+    color: var(--accent);
+}
+
+/* ---------- 5. Huy hiệu (Badges) ---------- */
+html[data-theme="light"] .badge-blue {
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563EB;
+}
+
+html[data-theme="light"] .badge-green {
+    background: rgba(21, 128, 61, 0.1);
+    color: #15803D;
+}
+
+html[data-theme="light"] .badge-orange {
+    background: rgba(180, 83, 9, 0.1);
+    color: #B45309;
+}
+
+html[data-theme="light"] .badge-red {
+    background: rgba(185, 28, 28, 0.1);
+    color: #B91C1C;
+}
+
+html[data-theme="light"] .badge-gray {
+    background: rgba(100, 116, 139, 0.1);
+    color: #475569;
+}
+
+html[data-theme="light"] .badge-purple {
+    background: rgba(124, 58, 237, 0.1);
+    color: #7C3AED;
+}
+
+/* ---------- 6. Form, Input & Modal ---------- */
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 15px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+html[data-theme="light"] input:focus,
+html[data-theme="light"] select:focus,
+html[data-theme="light"] textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+    color: #94A3B8;
+}
+
+html[data-theme="light"] label {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+html[data-theme="light"] .modal {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="light"] .modal-close {
+    color: var(--text-dim);
+}
+
+html[data-theme="light"] .modal-close:hover {
+    color: var(--text);
+}
+
+/* ---------- 7. Thanh tiến độ (Progress Bars) ---------- */
+html[data-theme="light"] .progress-track {
+    background: #E2E8F0;
+    border: none;
+}
+
+html[data-theme="light"] .progress-fill {
+    background: var(--accent);
+}
+
+/* ---------- 8. Lịch học & Khung Grid ---------- */
+html[data-theme="light"] .schedule-grid .head-cell {
+    color: var(--text-dim);
+}
+
+html[data-theme="light"] .slot-label {
+    background: #F8FAFC;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+}
+
+html[data-theme="light"] .slot-cell {
+    background: #F8FAFC;
+    border: 1px dashed var(--border);
+}
+
+html[data-theme="light"] .slot-cell.drag-over {
+    border-color: var(--accent);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+html[data-theme="light"] .wk th,
+html[data-theme="light"] .wk td {
+    border: 1px solid var(--border);
+}
+
+html[data-theme="light"] .wk th.today {
+    background: rgba(37, 99, 235, 0.08);
+    color: var(--accent);
+}
+
+html[data-theme="light"] .wk td.today {
+    background: rgba(37, 99, 235, 0.03);
+}
+
+html[data-theme="light"] .blk {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .blk-fap {
+    background: rgba(37, 99, 235, 0.05);
+    border-left: 3px solid var(--accent);
+}
+
+/* ---------- 9. Trạng thái Trống & Thông báo ---------- */
+html[data-theme="light"] .empty-state {
+    color: var(--text-dim);
+    background: #F8FAFC;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 24px;
+}
+
+html[data-theme="light"] .flash.success {
+    background: rgba(21, 128, 61, 0.08);
+    color: #15803D;
+    border: 1px solid rgba(21, 128, 61, 0.2);
+}
+
+html[data-theme="light"] .flash.error {
+    background: rgba(185, 28, 28, 0.08);
+    color: #B91C1C;
+    border: 1px solid rgba(185, 28, 28, 0.2);
+}
+
+/* ---------- 10. Nút chuyển đổi Theme ---------- */
+#themeToggle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    background: var(--bg-panel-2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all .15s ease;
+}
+
+#themeToggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+#themeToggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+#themeToggle.floating {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Đăng nhập */
+html[data-theme="light"] .login-wrap {
+    background: #F5F7FB;
+}
+
+html[data-theme="light"] .login-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}

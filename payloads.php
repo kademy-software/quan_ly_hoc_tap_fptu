@@ -83,7 +83,7 @@ include __DIR__ . '/includes/header.php';
                 <form method="post" onsubmit="return confirm('Xóa payload này?');">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" value="<?= $p['id'] ?>">
-                    <button type="submit" class="icon-btn">🗑️</button>
+                    <button type="submit" class="icon-btn" title="Xóa" aria-label="Xóa payload"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                 </form>
             </div>
             

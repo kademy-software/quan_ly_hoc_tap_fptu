@@ -18,4 +18,26 @@ function closeOnBackdropClick(modalId) {
         if (e.target === el) el.classList.remove('open');
     });
 }
-['subjectModal', 'fapModal', 'attendanceModal'].forEach(closeOnBackdropClick);
+['subjectModal', 'fapModal', 'attendanceModal', 'todoModal', 'moduleModal'].forEach(closeOnBackdropClick);
+
+// Dropdown click handler (ho tro click/cham tren tablet va mobile)
+(function () {
+    const dropdowns = document.querySelectorAll('.nav-dropdown');
+    dropdowns.forEach(dd => {
+        const btn = dd.querySelector('.nav-drop-btn');
+        if (!btn) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = dd.classList.contains('open');
+            // Dong cac dropdown khac
+            dropdowns.forEach(other => { if (other !== dd) other.classList.remove('open'); });
+            dd.classList.toggle('open', !isOpen);
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        dropdowns.forEach(dd => {
+            if (!dd.contains(e.target)) dd.classList.remove('open');
+        });
+    });
+})();

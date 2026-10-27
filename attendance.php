@@ -55,7 +55,7 @@ include __DIR__ . '/includes/header.php';
                 <td><span class="dot" style="background:<?= htmlspecialchars($r['color']) ?>"></span> <?= htmlspecialchars($r['subject_name']) ?></td>
                 <td><span class="badge <?= $cls ?>"><?= $label ?></span></td>
                 <td><?= htmlspecialchars($r['note'] ?: '—') ?></td>
-                <td><button class="icon-btn" onclick="deleteAttendance(<?= $r['id'] ?>)">🗑️</button></td>
+                <td><button class="icon-btn" title="Xóa" aria-label="Xóa bản ghi điểm danh" onclick="deleteAttendance(<?= $r['id'] ?>)"><i class="fa-solid fa-trash" aria-hidden="true"></i></button></td>
             </tr>
         <?php endforeach; ?>
         </tbody>

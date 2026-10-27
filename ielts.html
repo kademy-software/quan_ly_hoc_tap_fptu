@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IZONE - IELTS CHIẾN LƯỢC | Kết quả thi thử đợt 1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e4002b;
+            --navy: #14355e;
+            --text: #3b4a5f;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --line: #e3e7ee;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: "Be Vietnam Pro", "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* ===== Thanh trên cùng ===== */
+        .topbar {
+            background: #fff;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-icon { width: 46px; height: 46px; flex: none; }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 28px;
+            line-height: 1;
+            color: var(--red);
+            letter-spacing: 0.5px;
+        }
+
+        .brand-sub {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            color: var(--navy);
+            margin-top: 3px;
+        }
+
+        .topbar-title {
+            margin-left: 10px;
+            padding-left: 16px;
+            border-left: 2px solid var(--line);
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--navy);
+        }
+
+        /* ===== Nội dung ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 48px 24px 64px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin: 0 0 28px;
+            font-size: 30px;
+            font-weight: 600;
+            color: #2a2f3a;
+        }
+
+        .section-title svg { width: 44px; height: 44px; flex: none; }
+
+        .tab {
+            display: inline-block;
+            background: var(--navy);
+            color: #fff;
+            font-weight: 600;
+            font-size: 17px;
+            letter-spacing: 0.5px;
+            padding: 10px 14px;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 0 12px 12px 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 32px 32px 36px;
+        }
+
+        .card-heading {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 0;
+            margin: 0 0 6px;
+            font-size: 19px;
+            font-weight: 600;
+            color: var(--navy);
+        }
+
+        .card-heading::before {
+            content: "";
+            width: 4px;
+            height: 22px;
+            background: var(--red);
+            border-radius: 2px;
+        }
+
+        .meta {
+            margin: 0 0 24px 18px;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .meta strong { color: var(--navy); font-weight: 600; }
+
+        /* ===== Bảng điểm ===== */
+        .table-container { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            min-width: 72px;
+            border-right: 1px solid var(--line);
+            border-bottom: 1px solid var(--line);
+        }
+
+        th:last-child, td:last-child { border-right: 0; }
+        tbody tr:last-child td { border-bottom: 0; }
+
+        thead th {
+            background: var(--navy);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        thead tr:nth-child(2) th {
+            background: #eef2f8;
+            color: var(--navy);
+            font-size: 13px;
+        }
+
+        thead th.group { background: var(--red); }
+
+        td { color: #222; font-weight: 500; font-size: 16px; }
+        td.main { color: var(--red); font-weight: 700; }
+
+        .note {
+            margin-top: 18px;
+            font-size: 13px;
+            color: #7a8799;
+        }
+
+        @media (max-width: 640px) {
+            .section-title { font-size: 22px; }
+            .card { padding: 22px 16px; }
+            .topbar-title { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Thanh trên cùng: logo + IZONE - IELTS CHIẾN LƯỢC -->
+    <header class="topbar">
+        <svg class="logo-icon" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="46" fill="#e4002b"/>
+            <circle cx="50" cy="50" r="31" fill="#fff"/>
+            <circle cx="50" cy="50" r="20" fill="#e4002b"/>
+            <circle cx="50" cy="50" r="9" fill="#fff"/>
+        </svg>
+        <div>
+            <div class="brand-name">IZONE</div>
+            <div class="brand-sub">IELTS CHIẾN LƯỢC</div>
+        </div>
+        <div class="topbar-title">IZONE - IELTS CHIẾN LƯỢC</div>
+    </header>
+
+    <main class="container">
+        <h1 class="section-title">
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+                <circle cx="50" cy="50" r="46" fill="#e4002b"/>
+                <circle cx="50" cy="50" r="31" fill="#fff"/>
+                <circle cx="50" cy="50" r="20" fill="#e4002b"/>
+                <circle cx="50" cy="50" r="9" fill="#fff"/>
+            </svg>
+            IZONE - IELTS CHIẾN LƯỢC
+        </h1>
+
+        <span class="tab">16/10</span>
+        <section class="card">
+            <!-- Thông tin học viên -->
+            <h2 class="card-heading">Lê Tuấn Kiệt</h2>
+            <p class="meta">
+                <strong>Kết quả thi:</strong>TERM TEST 1<br>
+                <strong>Mã lớp:</strong> IC2277 <br>
+                  <strong>Overall:</strong>7.0
+                  <br> <strong>Note GV:</strong> 
+            </p>
+
+            <!-- Bảng điểm -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Listening<br>Score</th>
+                            <th rowspan="2">Listening<br>Raw Score</th>
+                            <th rowspan="2">Reading<br>Score</th>
+                            <th rowspan="2">Reading<br>Raw Score</th>
+                            <th class="group" colspan="5">Speaking</th>
+                            <th class="group" colspan="5">Writing Task 2</th>
+                        </tr>
+                        <tr>
+                            <th>Speaking<br>Score</th>
+                            <th>Fluency &amp;<br>Coherence</th>
+                            <th>Lexical<br>Resource</th>
+                            <th>Grammar</th>
+                            <th>Pronunciation</th>
+                            <th>Writing<br>Score</th>
+                            <th>Task<br>Response</th>
+                            <th>Coherence &amp;<br>Cohesion</th>
+                            <th>Lexical<br>Resource</th>
+                            <th>Grammar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="main">7.5</td>
+                            <td>33</td>
+                            <td class="main">8.0</td>
+                            <td>23</td>
+                            <td class="main">5.5</td>
+                            <td>6.5</td>
+                            <td>4.5</td>
+                            <td>6</td>
+                            <td>5.0</td>
+                            <td class="main">6.5</td>
+                            <td>7</td>
+                            <td>7</td>
+                            <td>6</td>
+                            <td>6</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>

@@ -1,4 +1,8 @@
 <?php
+// Ngày bắt đầu học kỳ (YYYY-MM-DD) - dùng cho lịch tuần ở index.php
+if (!defined('QLHT_SEMESTER_START')) {
+    define('QLHT_SEMESTER_START', '2026-09-07'); // đổi đúng ngày bắt đầu kỳ của bạn
+}
 require_once __DIR__ . '/database.php';
 
 if (session_status() === PHP_SESSION_NONE) {

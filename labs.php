@@ -71,7 +71,7 @@ include __DIR__ . '/includes/header.php';
         <form method="post" onsubmit="return confirm('Xóa Target này?');">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="id" value="<?= $lab['id'] ?>">
-            <button type="submit" class="icon-btn" style="width: 100%; text-align: center;">🗑️ Hủy máy (Terminate)</button>
+            <button type="submit" class="btn btn-danger btn-sm" style="width: 100%; text-align: center;"><i class="fa-solid fa-trash" aria-hidden="true"></i> Hủy máy (Terminate)</button>
         </form>
     </div>
     <?php endforeach; ?>

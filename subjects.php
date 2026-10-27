@@ -47,8 +47,8 @@ include __DIR__ . '/includes/header.php';
                     <span class="badge <?= $cls ?>"><?= $label ?></span>
                 </td>
                 <td>
-                    <button class="icon-btn" title="Sửa" onclick='editSubject(<?= json_encode($s, JSON_UNESCAPED_UNICODE) ?>)'>✏️</button>
-                    <button class="icon-btn" title="Xoá" onclick="deleteSubject(<?= $s['id'] ?>)">🗑️</button>
+                    <button class="icon-btn" title="Sửa" aria-label="Sửa thông tin môn học" onclick='editSubject(<?= json_encode($s, JSON_UNESCAPED_UNICODE) ?>)'><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></button>
+                    <button class="icon-btn" title="Xoá" aria-label="Xoá môn học" onclick="deleteSubject(<?= $s['id'] ?>)"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                 </td>
             </tr>
         <?php endforeach; ?>

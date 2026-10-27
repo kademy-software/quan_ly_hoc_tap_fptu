@@ -35,21 +35,21 @@ include __DIR__ . '/includes/header.php';
 <?php else: ?>
     <?php foreach ($subjectsByTerm as $term => $termSubjects): ?>
         <!-- Tiêu đề Học kỳ -->
-        <h3 style="margin-top: 24px; margin-bottom: 8px; color: #333; display: flex; align-items: center;">
-            <span style="display: inline-block; width: 6px; height: 20px; background: #a4d037; margin-right: 8px; border-radius: 4px;"></span>
+        <h3 style="margin-top: 24px; margin-bottom: 8px; color: var(--text); display: flex; align-items: center;">
+            <span style="display: inline-block; width: 4px; height: 18px; background: var(--accent); margin-right: 8px; border-radius: 2px;"></span>
             Học kỳ: <?= htmlspecialchars($term) ?>
         </h3>
         
         <!-- Bảng điểm của học kỳ tương ứng -->
-        <div class="card" style="margin-top: 8px; border: 1px solid #a4d037; padding: 0;">
+        <div class="card" style="margin-top: 8px; padding: 0; overflow: hidden;">
             <table style="width: 100%; border-collapse: collapse; margin: 0;">
                 <thead>
                     <tr>
-                        <th style="border-bottom: 2px solid #a4d037; text-align: left; padding: 12px; width: 25%;">Môn học</th>
-                        <th style="border-bottom: 2px solid #a4d037; text-align: left; padding: 12px; width: 12%;">Trạng thái</th>
-                        <th style="border-bottom: 2px solid #a4d037; text-align: left; padding: 12px; width: 38%;">Chi tiết đầu điểm</th>
-                        <th style="border-bottom: 2px solid #a4d037; text-align: center; padding: 12px; width: 10%;">Điểm tổng</th>
-                        <th style="border-bottom: 2px solid #a4d037; text-align: center; padding: 12px; width: 15%;">Thao tác</th>
+                        <th style="text-align: left; padding: 12px; width: 25%;">Môn học</th>
+                        <th style="text-align: left; padding: 12px; width: 12%;">Trạng thái</th>
+                        <th style="text-align: left; padding: 12px; width: 38%;">Chi tiết đầu điểm</th>
+                        <th style="text-align: center; padding: 12px; width: 10%;">Điểm tổng</th>
+                        <th style="text-align: center; padding: 12px; width: 15%;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -104,17 +104,17 @@ include __DIR__ . '/includes/header.php';
                                                 <td style="padding: 4px 0; border: none; width: 15%; color: #666;"><?= number_format((float)$c['weight_percent'], 0) ?>%</td>
                                                 <td style="padding: 4px 0; border: none; width: 30%;">
                                                     <input type="number" step="0.1" min="0" value="<?= $c['score'] !== null ? htmlspecialchars($c['score']) : '' ?>"
-                                                           style="width:55px; padding: 2px 4px; border: 1px solid #a4d037; border-radius: 4px; outline: none;" onchange="updateScore(<?= $c['id'] ?>, this.value)">
+                                                           style="width:55px; padding: 2px 4px; border: 1px solid var(--border); border-radius: 4px; outline: none;" onchange="updateScore(<?= $c['id'] ?>, this.value)">
                                                     / <?= number_format((float)$c['max_score'], 0) ?>
                                                 </td>
                                                 <td style="padding: 4px 0; border: none; text-align: right; width: 10%;">
-                                                    <button class="icon-btn" style="padding:0; background:none; border:none; cursor:pointer;" onclick="deleteComponent(<?= $c['id'] ?>, <?= $s['id'] ?>)">🗑️</button>
+                                                    <button class="icon-btn" title="Xóa đầu điểm" aria-label="Xóa đầu điểm" style="padding:0; background:none; border:none; cursor:pointer;" onclick="deleteComponent(<?= $c['id'] ?>, <?= $s['id'] ?>)"><i class="fa-solid fa-trash" aria-hidden="true"></i></button>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
                                     </table>
                                     <?php if ($weightSum != 100): ?>
-                                        <div style="color:var(--orange, #e67e22); font-size:12px; margin-top:6px;">⚠ Tổng trọng số: <?= $weightSum ?>%</div>
+                                        <div style="color:var(--orange); font-size:12px; margin-top:6px;"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Tổng trọng số: <?= $weightSum ?>%</div>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <div style="color: #888; font-size: 13px; margin-top: 4px;">Chưa có đầu điểm.</div>
@@ -126,7 +126,7 @@ include __DIR__ . '/includes/header.php';
                             <?php if ($isExempt): ?>
                                 <span class="badge badge-purple" style="font-size:15px; padding:6px 14px;">Miễn</span>
                             <?php else: ?>
-                                <span class="badge" style="font-size:15px; padding:6px 14px; background: #a4d037; color: white;">
+                                <span class="badge badge-green" style="font-size:14px; padding:5px 12px;">
                                     <?= $hasScore ? number_format($weightedScore, 2) : '—' ?> / 10
                                 </span>
                             <?php endif; ?>
@@ -134,7 +134,7 @@ include __DIR__ . '/includes/header.php';
                         
                         <td style="padding: 12px; text-align: center; vertical-align: middle;">
                             <?php if (!$isExempt): ?>
-                                <button class="btn btn-outline btn-sm" style="border-color: #a4d037; color: #a4d037; white-space: nowrap;" onclick="openComponentModal(<?= $s['id'] ?>)">+ Đầu điểm</button>
+                                <button class="btn btn-outline btn-sm" style="white-space: nowrap;" onclick="openComponentModal(<?= $s['id'] ?>)">+ Đầu điểm</button>
                             <?php endif; ?>
                         </td>
                     </tr>

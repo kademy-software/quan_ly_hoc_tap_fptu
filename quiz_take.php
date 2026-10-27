@@ -4,6 +4,17 @@ requireLogin();
 $db = getDB();
 $sid = (int)$_SESSION['student_id'];
 
+// Font Awesome (đã được nạp chuẩn 1 lần duy nhất trong header.php)
+$FA = '';
+
+// Tìm file âm thanh ở thư mục gốc hoặc các thư mục thường dùng; trả về đường dẫn tương đối (hoặc null nếu không thấy)
+function findSound(string $file): ?string {
+    foreach (['', 'assets/sounds/', 'assets/audio/', 'assets/', 'sounds/', 'audio/'] as $dir) {
+        if (is_file(__DIR__ . '/' . $dir . $file)) return $dir . $file;
+    }
+    return null;
+}
+
 // ==============================================================================
 // 0. XỬ LÝ CẬP NHẬT NỘI DUNG CÂU HỎI (AJAX POST -> JSON)
 // ==============================================================================
@@ -71,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 }
 
 // Lấy quiz_id từ URL
-$quiz_id =$_GET['id'] ?? null;
+$quiz_id = $_GET['id'] ?? null;
 
 // ==============================================================================
 // 1. NẾU KHÔNG CÓ ID -> HIỂN THỊ DANH SÁCH BÀI THI
@@ -85,47 +96,48 @@ if (!$quiz_id) {
         $stmt = $db->prepare("SELECT * FROM quizzes WHERE student_id = ? ORDER BY created_at DESC");
         $stmt->execute([$sid]);
     }
-    $quizzes =$stmt->fetchAll(PDO::FETCH_ASSOC);
+    $quizzes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $pageTitle = 'Danh sách bài trắc nghiệm';
     $activePage = 'quiz';
-    include __DIR__ . '/includes/header.php'; //[cite: 4]
+    include __DIR__ . '/includes/header.php';
     ?>
-    
+    <?= $FA ?>
+
     <div class="card-header" style="margin-bottom: 20px;">
         <h2>Chọn bài trắc nghiệm để bắt đầu</h2>
-        <a href="quiz_create.php" class="btn btn-outline btn-sm">+ Tạo bài mới</a> <!--[cite: 2] -->
+        <a href="quiz_create.php" class="btn btn-outline btn-sm"><i class="fa-solid fa-plus" aria-hidden="true"></i> Tạo bài mới</a>
     </div>
 
-    <div class="grid grid-3"> <!--[cite: 2] -->
-        <?php foreach ($quizzes as$q): ?>
+    <div class="grid grid-3">
+        <?php foreach ($quizzes as $q): ?>
             <?php
             // Đếm số lượng câu hỏi trong bài
-            $count_stmt =$db->prepare("SELECT COUNT(*) as c FROM quiz_questions WHERE quiz_id = ?");
+            $count_stmt = $db->prepare("SELECT COUNT(*) as c FROM quiz_questions WHERE quiz_id = ?");
             $count_stmt->execute([$q['id']]);
-            $q_count =$count_stmt->fetch()['c'];
+            $q_count = $count_stmt->fetch()['c'];
             ?>
-            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;"> <!--[cite: 2] -->
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div class="badge badge-blue" style="margin-bottom: 12px;"> <!--[cite: 2] -->
+                    <div class="badge badge-blue" style="margin-bottom: 12px;">
                         <?= htmlspecialchars($q['description'] ?: 'Assessment') ?>
                     </div>
-                    <h3 style="margin-top: 0; margin-bottom: 8px; color: var(--accent);"><?= htmlspecialchars($q['title']) ?></h3> <!--[cite: 2] -->
+                    <h3 style="margin-top: 0; margin-bottom: 8px; color: var(--accent);"><?= htmlspecialchars($q['title']) ?></h3>
                     
-                    <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0;"> <!--[cite: 2] -->
+                    <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0;">
                         <strong>Số câu hỏi:</strong> <?= $q_count ?> câu
                     </p>
-                    <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0;"> <!--[cite: 2] -->
+                    <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0;">
                         <strong>Ngày tạo:</strong> <?= date('d/m/Y', strtotime($q['created_at'])) ?>
                     </p>
                 </div>
                 <div style="margin-top: 20px;">
-                    <a href="quiz_take.php?id=<?= $q['id'] ?>" class="btn btn-accent" style="display: block; text-align: center; font-weight: bold;"> <!--[cite: 2] -->
-                        Bắt đầu làm bài ❯
+                    <a href="quiz_take.php?id=<?= $q['id'] ?>" class="btn btn-accent" style="display: block; text-align: center; font-weight: bold;">
+                        Bắt đầu làm bài <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                     </a>
                     <?php if (canEditQuiz($q)): ?>
                     <a href="quiz_take.php?id=<?= $q['id'] ?>&manage=1" class="btn btn-outline" style="display: block; text-align: center; margin-top: 8px;">
-                        ✎ Sửa câu hỏi
+                        <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Sửa câu hỏi
                     </a>
                     <?php endif; ?>
                 </div>
@@ -133,34 +145,34 @@ if (!$quiz_id) {
         <?php endforeach; ?>
 
         <?php if (empty($quizzes)): ?>
-            <div class="empty-state" style="grid-column: 1 / -1;"> <!--[cite: 2] -->
+            <div class="empty-state" style="grid-column: 1 / -1;">
                 Chưa có bài trắc nghiệm nào. Hãy tạo bài thi mới để luyện tập nhé!
             </div>
         <?php endif; ?>
     </div>
 
     <?php
-    include __DIR__ . '/includes/footer.php'; //[cite: 3]
+    include __DIR__ . '/includes/footer.php';
     exit; // Dừng tại đây, không load phần làm bài bên dưới
 }
 
 // ==============================================================================
 // 2. NẾU CÓ ID -> HIỂN THỊ GIAO DIỆN LÀM BÀI
 // ==============================================================================
-$quiz_stmt =$db->prepare("SELECT * FROM quizzes WHERE id = ?");
+$quiz_stmt = $db->prepare("SELECT * FROM quizzes WHERE id = ?");
 $quiz_stmt->execute([$quiz_id]);
-$quiz =$quiz_stmt->fetch(PDO::FETCH_ASSOC);
+$quiz = $quiz_stmt->fetch(PDO::FETCH_ASSOC);
 
 // Kiểm tra xem bài thi có tồn tại không
 if (!$quiz || !canEditQuiz($quiz)) {$pageTitle = 'Không tìm thấy bài thi';
     $activePage = 'quiz';
-    include __DIR__ . '/includes/header.php';  //[cite: 4]
+    include __DIR__ . '/includes/header.php';
     echo "<div class='card' style='text-align: center; padding: 50px 20px; margin-top: 20px;'>
-            <h2 style='color: var(--red);'>Không tìm thấy bài thi!</h2> <!-- -->
-            <p style='color: var(--text-dim); margin-bottom: 20px;'>Bài trắc nghiệm này không tồn tại, đã bị xóa hoặc bạn không có quyền truy cập.</p> <!--[cite: 2] -->
-            <a href='quiz_take.php' class='btn btn-outline'>Về danh sách bài thi</a> <!--[cite: 2] -->
+            <h2 style='color: var(--red);'>Không tìm thấy bài thi!</h2>
+            <p style='color: var(--text-dim); margin-bottom: 20px;'>Bài trắc nghiệm này không tồn tại, đã bị xóa hoặc bạn không có quyền truy cập.</p>
+            <a href='quiz_take.php' class='btn btn-outline'>Về danh sách bài thi</a>
           </div>";
-    include __DIR__ . '/includes/footer.php'; //[cite: 3]
+    include __DIR__ . '/includes/footer.php';
     exit;
 }
 
@@ -176,6 +188,7 @@ if (isset($_GET['manage'])) {
     $activePage = 'quiz';
     include __DIR__ . '/includes/header.php';
     ?>
+    <?= $FA ?>
 
     <div class="card-header" style="margin-bottom: 20px;">
         <div>
@@ -183,8 +196,8 @@ if (isset($_GET['manage'])) {
             <span style="color: var(--text-dim); font-size: 13px;"><?= htmlspecialchars($quiz['title']) ?> · <b id="manageCount"><?= count($manage_questions) ?></b> câu</span>
         </div>
         <div class="toolbar">
-            <a href="quiz_take.php" class="btn btn-outline btn-sm">☰ Danh sách bài</a>
-            <a href="quiz_take.php?id=<?= (int)$quiz_id ?>" class="btn btn-accent btn-sm">Làm bài ❯</a>
+            <a href="quiz_take.php" class="btn btn-outline btn-sm"><i class="fa-solid fa-list" aria-hidden="true"></i> Danh sách bài</a>
+            <a href="quiz_take.php?id=<?= (int)$quiz_id ?>" class="btn btn-accent btn-sm">Làm bài <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>
         </div>
     </div>
 
@@ -249,7 +262,7 @@ if (isset($_GET['manage'])) {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'btn btn-outline btn-sm';
-            btn.textContent = '✎ Sửa';
+            btn.innerHTML = '<i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Sửa';
             btn.onclick = () => editQuestion(i);
             tdAct.appendChild(btn);
             tr.appendChild(tdAct);
@@ -284,72 +297,67 @@ if (isset($_GET['manage'])) {
 }
 
 // Lấy danh sách câu hỏi
-$q_stmt =$db->prepare("SELECT * FROM quiz_questions WHERE quiz_id = ?");
+$q_stmt = $db->prepare("SELECT * FROM quiz_questions WHERE quiz_id = ? ORDER BY id"); // cố định thứ tự câu = số câu trong bài
 $q_stmt->execute([$quiz_id]);
-$questions =$q_stmt->fetchAll(PDO::FETCH_ASSOC);
+$questions = $q_stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $pageTitle = 'Làm bài: ' . $quiz['title'];$activePage = 'quiz';
-include __DIR__ . '/includes/header.php'; //[cite: 4]
+include __DIR__ . '/includes/header.php';
 ?>
+<?= $FA ?>
 
 <!-- ================= GIAO DIỆN LÀM BÀI (HTML & CSS & JS) ================= -->
 <style>
-/* CSS Tùy chỉnh bám sát giao diện trong hình và style.css */
+/* Giao diện làm bài: ẩn thanh header của site để tập trung */
+.topbar { display: none !important; }
+
 .qz-wrap { max-width: 1120px; margin: 0 auto; padding-top: 10px; }
 .qz-header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;}
-.qz-title { color: var(--accent); font-size: 24px; margin: 0; font-weight: 500; } /*[cite: 2] */
-.qz-subtitle { color: var(--text); font-size: 14px; margin-top: 5px; opacity: 0.9; } /*[cite: 2] */
-.qz-tools { display: flex; gap: 15px; color: var(--text-dim); font-size: 13px; } /*[cite: 2] */
+.qz-title { color: var(--accent); font-size: 24px; margin: 0; font-weight: 500; }
+.qz-subtitle { color: var(--text); font-size: 14px; margin-top: 5px; opacity: 0.9; }
+.qz-tools { display: flex; gap: 15px; color: var(--text-dim); font-size: 13px; }
 .qz-tools span, .qz-tools a { cursor: pointer; display: flex; align-items: center; gap: 5px; color: inherit; text-decoration: none;}
 
 .qz-progress-container { margin-bottom: 25px; }
-.qz-progress-bar { height: 4px; background: var(--bg-panel-2); border-radius: 2px; position: relative; } /*[cite: 2] */
-.qz-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; } /*[cite: 2] */
-.qz-progress-text { text-align: right; font-size: 12px; color: var(--text-dim); margin-top: 8px; } /*[cite: 2] */
+.qz-progress-bar { height: 4px; background: var(--bg-panel-2); border-radius: 2px; position: relative; }
+.qz-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
+.qz-progress-text { text-align: right; font-size: 12px; color: var(--text-dim); margin-top: 8px; }
 
-.qz-badge { background: rgba(78,161,255,.15); color: var(--blue); padding: 5px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin-bottom: 15px; font-weight: bold; } /*[cite: 2] */
+.qz-badge { background: rgba(78,161,255,.15); color: var(--blue); padding: 5px 12px; border-radius: 20px; font-size: 12px; display: inline-block; margin-bottom: 15px; font-weight: bold; }
 
-.qz-question-box { background: var(--bg-panel-2); padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.5; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.1); } /*[cite: 2] */
+.qz-question-box { background: var(--bg-panel-2); padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.5; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 
-.qz-option { background: var(--bg-panel); border: 1px solid var(--border); padding: 16px 20px; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; } /*[cite: 2] */
-.qz-option:hover:not(.disabled) { border-color: var(--text-dim); background: var(--bg-panel-2); } /*[cite: 2] */
+.qz-option { background: var(--bg-panel); border: 1px solid var(--border); padding: 16px 20px; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; }
+.qz-option:hover:not(.disabled) { border-color: var(--text-dim); background: var(--bg-panel-2); }
 .qz-option.disabled { cursor: not-allowed; opacity: 0.8; }
 .qz-option.hidden { display: none; }
 .qz-option.wrong { animation: qzShake 0.35s; }
 @keyframes qzShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 
 /* Trạng thái đúng/sai */
-.qz-option.correct { border-color: var(--accent); color: var(--accent); background: rgba(164,208,55,.05); } /*[cite: 2] */
-.qz-option.wrong { border-color: var(--red); color: var(--red); background: rgba(226,68,92,.05); } /*[cite: 2] */
+.qz-option.correct { border-color: var(--accent); color: var(--accent); background: rgba(164,208,55,.05); }
+.qz-option.wrong { border-color: var(--red); color: var(--red); background: rgba(226,68,92,.05); }
 
 .qz-icon-check { display: none; }
 .qz-option.correct .qz-icon-check { display: block; font-weight: bold; }
-.qz-option.wrong .qz-icon-check { display: block; content: '✕'; font-weight: bold; }
+.qz-option.wrong .qz-icon-check { display: block; font-weight: bold; }
 
-.qz-explanation { background: var(--bg-panel-2); border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-top: 20px; font-size: 14px; display: none; } /*[cite: 2] */
-.qz-btn-next { background: var(--accent); color: #000; font-weight: bold; padding: 10px 24px; border-radius: 6px; border: none; cursor: pointer; float: right; margin-top: 20px; display: none; transition: background 0.2s; } /*[cite: 2] */
-.qz-btn-next:hover { background: var(--accent-dark); } /*[cite: 2] */
+.qz-explanation { background: var(--bg-panel-2); border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-top: 20px; font-size: 14px; display: none; }
+.qz-btn-next { background: var(--accent); color: #000; font-weight: bold; padding: 10px 24px; border-radius: 6px; border: none; cursor: pointer; float: right; margin-top: 20px; display: none; transition: background 0.2s; }
+.qz-btn-next:hover { background: var(--accent-dark); }
 
-.qz-tree { position: fixed; left: 16px; bottom: 16px; width: 130px; z-index: 50; pointer-events: none; text-align: center; }
-.qz-tree svg { width: 100%; height: auto; display: block; overflow: visible; }
-.qz-tree-plant { transform-origin: 60px 150px; transition: transform 0.8s cubic-bezier(.34,1.56,.64,1); }
-.qz-tree-fruit { opacity: 0; transition: opacity 0.6s; }
-.qz-tree-label { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
-.qz-tree.pop .qz-tree-plant { animation: qzTreePop 0.6s; }
-@keyframes qzTreePop { 0%,100%{filter:none} 50%{filter:brightness(1.4)} }
-@media (max-width: 700px) { .qz-tree { width: 80px; left: 8px; bottom: 8px; } }
-.qz-results { display: none; text-align: center; padding: 40px 20px; background: var(--bg-panel-2); border-radius: var(--radius); border: 1px solid var(--border); } /*[cite: 2] */
+.qz-results { display: none; text-align: center; padding: 40px 20px; background: var(--bg-panel-2); border-radius: var(--radius); border: 1px solid var(--border); }
 
 /* Số phím tắt trên đáp án */
 .qz-opt-label { display: flex; align-items: center; gap: 12px; }
 .qz-key { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 6px; background: var(--bg-panel-2); border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; font-weight: bold; flex-shrink: 0; }
-.qz-option.hidden { display: none; }
 .qz-hint { font-size: 12px; color: var(--text-dim); margin-top: 14px; }
 
 /* Bố cục + bảng chọn câu hỏi bên phải */
 .qz-layout { display: grid; grid-template-columns: 1fr 200px; gap: 24px; align-items: start; }
 .qz-nav { position: sticky; top: 16px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px; }
-.qz-nav-title { font-size: 13px; font-weight: bold; color: var(--text); margin-bottom: 10px; }
+.qz-nav-title { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: bold; color: var(--text); margin-bottom: 10px; }
+.qz-nav-close { display: none; background: transparent; border: none; color: var(--text-dim); font-size: 20px; line-height: 1; padding: 4px 8px; cursor: pointer; }
 .qz-nav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .qz-nav-item { aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-panel-2); color: var(--text); cursor: pointer; font-size: 12px; padding: 0; transition: all 0.15s; }
 .qz-nav-item:hover { border-color: var(--text-dim); }
@@ -358,7 +366,94 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
 .qz-nav-item.current { outline: 2px solid var(--accent); outline-offset: 1px; font-weight: bold; }
 .qz-nav-legend { margin-top: 12px; font-size: 11px; color: var(--text-dim); line-height: 1.8; }
 .qz-dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; border: 1px solid var(--border); }
-@media (max-width: 800px) { .qz-layout { grid-template-columns: 1fr; } .qz-nav { position: static; } }
+
+/* ===== Thanh điều hướng dưới + ngăn chọn câu (chỉ hiện trên điện thoại/tablet dọc) ===== */
+.qz-mobilebar, .qz-nav-backdrop { display: none; }
+.qz-option { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.qz-opt-label > span:last-child { overflow-wrap: anywhere; }
+.qz-question-box { overflow-wrap: anywhere; }
+
+@media (hover: none) {
+    .qz-option:hover:not(.disabled) { border-color: var(--border); background: var(--bg-panel); }
+    .qz-option:active:not(.disabled) { border-color: var(--accent); background: var(--bg-panel-2); }
+    .qz-hint { display: none; }
+}
+
+@media (max-width: 800px) {
+    .qz-wrap { padding-top: 0; padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
+    .qz-layout { grid-template-columns: 1fr; gap: 0; }
+    .qz-hint { display: none; }
+
+    .qz-header-top { flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .qz-title { font-size: 19px; line-height: 1.3; }
+    .qz-tools { width: 100%; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .qz-progress-container { margin-bottom: 14px; }
+    .qz-progress-bar { height: 6px; border-radius: 3px; }
+    .qz-progress-fill { border-radius: 3px; }
+
+    .qz-badge-row { flex-wrap: wrap; }
+    .qz-question-box { font-size: 16px; padding: 14px; margin-bottom: 14px; }
+    .qz-option { padding: 14px; margin-bottom: 10px; font-size: 15px; gap: 10px; user-select: none; -webkit-user-select: none; }
+    .qz-key { width: 28px; height: 28px; }
+    .qz-explanation { margin-top: 14px; padding: 14px; }
+    .qz-btn-next { display: none !important; } /* đã có nút "Câu tiếp" ở thanh dưới */
+
+    .qz-setup { margin: 8px auto; padding: 18px; }
+    .qz-field input[type=number] { font-size: 16px; padding: 12px; }
+    .qz-presets button { padding: 8px 14px; font-size: 13px; }
+    #btnStart { min-height: 48px; }
+    .qz-results { padding: 28px 16px; }
+    .qz-results h1 { font-size: 40px !important; }
+    .qz-results .btn { display: block; margin: 8px 0 0; text-align: center; min-height: 44px; line-height: 26px; }
+
+    .qz-mobilebar {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+        display: flex; gap: 8px;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+        background: var(--bg-panel); border-top: 1px solid var(--border);
+    }
+    .qz-mb-btn {
+        min-height: 46px; border-radius: 10px; border: 1px solid var(--border);
+        background: var(--bg-panel-2); color: var(--text);
+        font-size: 14px; font-weight: 700; cursor: pointer;
+        touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .qz-mb-btn:disabled { opacity: .35; }
+    .qz-mb-prev { flex: 0 0 52px; }
+    .qz-mb-list { flex: 1 1 0; }
+    .qz-mb-next { flex: 1.3 1 0; }
+    .qz-mb-next.ready { background: var(--accent); border-color: var(--accent); color: #0b0f17; }
+
+    .qz-nav {
+        position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 120;
+        max-height: 75vh; overflow-y: auto;
+        border-radius: 16px 16px 0 0; border-bottom: none;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+        transform: translateY(105%); transition: transform .25s ease;
+        box-shadow: 0 -8px 24px rgba(0,0,0,.45);
+    }
+    .qz-nav.open { transform: translateY(0); }
+    .qz-nav-title { font-size: 15px; }
+    .qz-nav-close { display: inline-flex; }
+    .qz-nav-backdrop { position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,.55); }
+    .qz-nav-backdrop.open { display: block; }
+    .qz-nav-grid { grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 8px; }
+    .qz-nav-item { min-height: 46px; font-size: 14px; }
+    .qz-nav-legend { font-size: 12px; }
+}
+
+/* Chọn chế độ thi: ngẫu nhiên / theo phạm vi câu */
+.qz-mode { display: flex; gap: 8px; }
+.qz-field .qz-mode-opt { flex: 1; position: relative; margin: 0; cursor: pointer; }
+.qz-mode-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.qz-mode-opt span { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-panel-2); color: var(--text-dim); font-size: 14px; font-weight: 600; text-align: center; transition: all .15s; }
+.qz-mode-opt input:checked + span { border-color: var(--accent); color: var(--accent); background: rgba(164,208,55,.08); }
+.qz-mode-opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.qz-range-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; }
+.qz-range-row small { margin: 0 0 4px; }
+.qz-range-sep { padding-bottom: 10px; color: var(--text-dim); }
+#soundBtn.off { opacity: .55; }
+@media (max-width: 480px) { .qz-mode-opt span { font-size: 13px; padding: 10px 6px; } }
 
 /* Màn hình thiết lập + đồng hồ */
 .qz-setup { max-width: 520px; margin: 30px auto; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 28px; }
@@ -389,18 +484,38 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
             <div class="qz-subtitle">Practice assessment</div>
         </div>
         <div class="qz-tools">
-            <div class="qz-timer" id="timerBox">⏱ <span id="timerText">00:00</span></div>
-            <a href="quiz_take.php">☰ Danh sách bài</a>
-            <span onclick="location.reload()">↺ Restart</span>
+            <div class="qz-timer" id="timerBox"><i class="fa-solid fa-stopwatch" aria-hidden="true"></i> <span id="timerText">00:00</span></div>
+            <a href="quiz_take.php"><i class="fa-solid fa-list" aria-hidden="true"></i> Danh sách bài</a>
+            <span onclick="location.reload()"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> Restart</span>
+            <span id="soundBtn" role="button" tabindex="0" title="Bật/tắt âm thanh đúng/sai"><i class="fa-solid fa-volume-high" id="soundIcon" aria-hidden="true"></i></span>
         </div>
     </div>
 
-    <!-- Màn hình thiết lập: chọn số câu + thời gian -->
+    <!-- Màn hình thiết lập -->
     <div class="qz-setup" id="setupScreen" style="display:none;">
         <h2>Thiết lập bài làm</h2>
-        <div class="qz-setup-sub">Bài này có <b id="poolCount">0</b> câu hỏi. Chọn số câu ngẫu nhiên và thời gian làm bài.</div>
+        <div class="qz-setup-sub">Bài này có <b id="poolCount">0</b> câu hỏi. Chọn cách chọn câu hỏi và thời gian làm bài.</div>
 
         <div class="qz-field">
+            <label>Cách chọn câu hỏi</label>
+            <div class="qz-mode">
+                <label class="qz-mode-opt"><input type="radio" name="setupMode" value="random" checked><span><i class="fa-solid fa-shuffle" aria-hidden="true"></i> Ngẫu nhiên</span></label>
+                <label class="qz-mode-opt"><input type="radio" name="setupMode" value="range"><span><i class="fa-solid fa-list-ol" aria-hidden="true"></i> Theo phạm vi câu</span></label>
+            </div>
+        </div>
+
+        <div class="qz-field" id="fieldRange" style="display:none;">
+            <label for="setupFrom">Thi từ câu ... đến câu ...</label>
+            <div class="qz-range-row">
+                <div><small>Từ câu</small><input type="number" id="setupFrom" min="1" step="1" inputmode="numeric"></div>
+                <div class="qz-range-sep">–</div>
+                <div><small>Đến câu</small><input type="number" id="setupTo" min="1" step="1" inputmode="numeric"></div>
+            </div>
+            <div class="qz-presets" id="rangePresets"></div>
+            <small id="rangeSummary"></small>
+        </div>
+
+        <div class="qz-field" id="fieldRandom">
             <label for="setupCount">Số câu hỏi</label>
             <input type="number" id="setupCount" min="1" step="1">
             <div class="qz-presets" id="countPresets"></div>
@@ -414,10 +529,12 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
         </div>
 
         <div class="qz-field">
-            <label class="qz-check"><input type="checkbox" id="setupShuffle" checked> Chọn ngẫu nhiên và xáo trộn thứ tự câu hỏi</label>
+            <label class="qz-check"><input type="checkbox" id="setupShuffle" checked> <span id="shuffleText">Chọn ngẫu nhiên và xáo trộn thứ tự câu hỏi</span></label>
         </div>
 
-        <button type="button" class="btn btn-accent" id="btnStart" style="width:100%; font-weight:bold; padding:12px;">Bắt đầu làm bài ❯</button>
+        <div class="flash error" id="setupError" style="display:none;"></div>
+
+        <button type="button" class="btn btn-accent" id="btnStart" style="width:100%; font-weight:bold; padding:12px;">Bắt đầu làm bài <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
     </div>
 
     <div class="qz-layout" style="display:none;" id="quizLayout">
@@ -430,14 +547,14 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
             <div id="quizContent">
                 <div class="qz-badge-row">
                     <div class="qz-badge"><?= htmlspecialchars($quiz['description'] ?: 'Assessment') ?></div>
-                    <button type="button" class="btn btn-outline btn-sm" id="btnEditQ">✎ Sửa câu hỏi</button>
+                    <button type="button" class="btn btn-outline btn-sm" id="btnEditQ"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Sửa câu hỏi</button>
                 </div>
                 <div class="qz-question-box" id="questionText">Loading question...</div>
 
                 <div id="optionsContainer"></div>
 
                 <div class="qz-explanation" id="explanationBox"></div>
-                <button class="qz-btn-next" id="btnNext" onclick="nextQuestion()">Next Question ❯ <small>(Enter)</small></button>
+                <button class="qz-btn-next" id="btnNext" onclick="nextQuestion()">Next Question <i class="fa-solid fa-chevron-right" aria-hidden="true"></i> <small>(Enter)</small></button>
                 <div style="clear: both;"></div>
                 <div class="qz-hint">Phím tắt: <b>1 2 3 4</b> chọn đáp án · <b>Enter</b> sang câu tiếp theo</div>
             </div>
@@ -446,13 +563,13 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
                 <h2 style="color: var(--accent); margin-bottom: 10px;" id="resultTitle">Phân tích kết quả</h2>
                 <h1 style="font-size: 48px; margin: 10px 0;" id="scorePercent">0%</h1>
                 <p style="color: var(--text-dim); margin-bottom: 20px; white-space: pre-line;" id="scoreDetail"></p>
-                <a href="quiz_take.php?id=<?= $quiz_id ?>" class="btn btn-accent">Làm lại bài thi</a>
+                <a href="quiz_take.php?id=<?= (int)$quiz_id ?>" class="btn btn-accent">Làm lại bài thi</a>
                 <a href="quiz_take.php" class="btn btn-outline">Về danh sách</a>
             </div>
         </div>
 
         <aside class="qz-nav" id="quizNav">
-            <div class="qz-nav-title">Danh sách câu hỏi</div>
+            <div class="qz-nav-title"><span>Danh sách câu hỏi</span><button type="button" class="qz-nav-close" id="navClose" aria-label="Đóng"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button></div>
             <div class="qz-nav-grid" id="navGrid"></div>
             <div class="qz-nav-legend">
                 <div><span class="qz-dot" style="background: rgba(164,208,55,.4)"></span>Đúng ngay lần đầu</div>
@@ -460,28 +577,14 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
                 <div><span class="qz-dot"></span>Chưa làm</div>
             </div>
         </aside>
-    </div>
-</div>
 
-<div class="qz-tree" id="quizTree" style="display:none;">
-    <svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="60" cy="152" rx="50" ry="7" fill="#5a3d24" opacity="0.6"/>
-        <g class="qz-tree-plant" id="treePlant" style="transform: scale(0.15);">
-            <rect x="54" y="80" width="12" height="70" rx="3" fill="#8b5a2b"/>
-            <circle cx="60" cy="70" r="30" fill="#3f9142"/>
-            <circle cx="38" cy="86" r="22" fill="#4caf50"/>
-            <circle cx="82" cy="86" r="22" fill="#4caf50"/>
-            <circle cx="60" cy="48" r="22" fill="#66bb6a"/>
-            <g class="qz-tree-fruit" id="treeFruit">
-                <circle cx="48" cy="62" r="4" fill="#e2445c"/>
-                <circle cx="74" cy="76" r="4" fill="#e2445c"/>
-                <circle cx="60" cy="42" r="4" fill="#e2445c"/>
-                <circle cx="36" cy="88" r="4" fill="#e2445c"/>
-                <circle cx="86" cy="92" r="4" fill="#e2445c"/>
-            </g>
-        </g>
-    </svg>
-    <div class="qz-tree-label" id="treeLabel">🌱 0/0</div>
+        <div class="qz-nav-backdrop" id="navBackdrop"></div>
+        <div class="qz-mobilebar" id="mobileBar">
+            <button type="button" class="qz-mb-btn qz-mb-prev" id="mbPrev" aria-label="Câu trước"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+            <button type="button" class="qz-mb-btn qz-mb-list" id="mbList"><i class="fa-solid fa-table-cells" aria-hidden="true"></i> <span id="mbCount">Câu 1/1</span></button>
+            <button type="button" class="qz-mb-btn qz-mb-next" id="mbNext">Bỏ qua <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+        </div>
+    </div>
 </div>
 
 <?php include __DIR__ . '/includes/question_editor.php'; ?>
@@ -491,9 +594,9 @@ include __DIR__ . '/includes/header.php'; //[cite: 4]
 <script>
 // Dữ liệu câu hỏi từ PHP truyền xuống
 const questionPool = <?= json_encode($questions) ?>;
-questionPool.forEach(q => { q.done = false; q.firstTry = false; q.wrongOpts = []; });
+questionPool.forEach((q, i) => { q.no = i + 1; q.done = false; q.firstTry = false; q.wrongOpts = []; }); // q.no = số câu trong bài
 
-let allQuestions = [];          // bộ câu hỏi đang làm (sau khi chọn ngẫu nhiên)
+let allQuestions = [];          // bộ câu hỏi đang làm
 let totalUniqueQuestions = 0;
 let quizStarted = false;
 let timeUp = false;
@@ -516,6 +619,89 @@ const DOM = {
     navGrid: document.getElementById('navGrid')
 };
 
+// ================= ÂM THANH ĐÚNG / SAI =================
+// dung.mp3 = chọn đúng, wrong_sound.mp3 = chọn sai (đặt cùng thư mục với quiz_take.php hoặc trong assets/sounds/)
+const SOUND_URLS = {
+    correct: <?= json_encode(findSound('dung.mp3')) ?>,
+    wrong: <?= json_encode(findSound('wrong_sound.mp3')) ?>
+};
+const SND = { on: true, audio: {} };
+try { SND.on = localStorage.getItem('qz_sound') !== 'off'; } catch (e) {}
+Object.keys(SOUND_URLS).forEach(k => {
+    if (!SOUND_URLS[k]) { console.warn('Không tìm thấy file âm thanh cho: ' + k); return; }
+    const a = new Audio(SOUND_URLS[k]);
+    a.preload = 'auto';
+    SND.audio[k] = a;
+});
+
+function playSound(kind) {
+    if (!SND.on) return;
+    const a = SND.audio[kind];
+    if (!a) return;
+    Object.keys(SND.audio).forEach(k => { if (k !== kind) SND.audio[k].pause(); });
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});
+}
+
+// Safari/iOS chỉ cho phát âm thanh sau khi người dùng đã chạm: "mở khóa" khi bấm Bắt đầu
+function unlockAudio() {
+    Object.values(SND.audio).forEach(a => {
+        a.muted = true;
+        const p = a.play();
+        if (p && p.then) {
+            p.then(() => { a.pause(); a.currentTime = 0; a.muted = false; }).catch(() => { a.muted = false; });
+        } else {
+            a.pause(); a.muted = false;
+        }
+    });
+}
+
+const soundBtn = document.getElementById('soundBtn');
+function renderSoundBtn() {
+    document.getElementById('soundIcon').className = 'fa-solid ' + (SND.on ? 'fa-volume-high' : 'fa-volume-xmark');
+    soundBtn.classList.toggle('off', !SND.on);
+}
+function toggleSound() {
+    SND.on = !SND.on;
+    try { localStorage.setItem('qz_sound', SND.on ? 'on' : 'off'); } catch (e) {}
+    renderSoundBtn();
+    if (SND.on) playSound('correct'); // nghe thử
+}
+if (Object.keys(SND.audio).length === 0) {
+    soundBtn.style.display = 'none'; // không có file âm thanh nào -> ẩn nút
+} else {
+    soundBtn.onclick = toggleSound;
+    soundBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSound(); } });
+    renderSoundBtn();
+}
+
+// ================= THANH ĐIỀU HƯỚNG DƯỚI (điện thoại) =================
+const MB = {
+    bar: document.getElementById('mobileBar'),
+    prev: document.getElementById('mbPrev'),
+    list: document.getElementById('mbList'),
+    next: document.getElementById('mbNext'),
+    count: document.getElementById('mbCount'),
+    nav: document.getElementById('quizNav'),
+    backdrop: document.getElementById('navBackdrop')
+};
+function openNav() {
+    MB.nav.classList.add('open');
+    MB.backdrop.classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeNav() {
+    MB.nav.classList.remove('open');
+    MB.backdrop.classList.remove('open');
+    document.body.style.overflow = '';
+}
+MB.list.onclick = openNav;
+MB.backdrop.onclick = closeNav;
+document.getElementById('navClose').onclick = closeNav;
+MB.prev.onclick = () => { if (currentIndex > 0) goTo(currentIndex - 1); };
+MB.next.onclick = () => nextQuestion();
+
 const countCorrect = () => allQuestions.filter(q => q.firstTry).length;
 const countDone = () => allQuestions.filter(q => q.done).length;
 
@@ -528,9 +714,9 @@ function renderNav() {
         b.className = 'qz-nav-item';
         if (q.done) b.classList.add(q.firstTry ? 'ok' : 'retry');
         if (i === currentIndex) b.classList.add('current');
-        b.textContent = i + 1;
-        b.title = 'Câu ' + (i + 1);
-        b.onclick = () => { b.blur(); goTo(i); };
+        b.textContent = rangeMode ? q.no : i + 1;
+        b.title = 'Câu ' + (rangeMode ? q.no : i + 1);
+        b.onclick = () => { b.blur(); closeNav(); goTo(i); };
         DOM.navGrid.appendChild(b);
     });
 }
@@ -541,7 +727,9 @@ function goTo(i) {
     DOM.content.style.display = 'block';
     DOM.progressContainer.style.display = 'block';
     DOM.results.style.display = 'none';
+    MB.bar.style.display = '';
     renderQuestion();
+    if (window.matchMedia('(max-width: 800px)').matches) window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ================= HIỂN THỊ CÂU HỎI =================
@@ -553,8 +741,12 @@ function renderQuestion() {
     DOM.options.innerHTML = '';
 
     DOM.progFill.style.width = (totalUniqueQuestions ? countDone() / totalUniqueQuestions * 100 : 0) + '%';
-    DOM.progText.innerText = `Câu ${currentIndex + 1} / ${totalUniqueQuestions}`;
+    DOM.progText.innerText = `Câu ${currentIndex + 1} / ${totalUniqueQuestions}` + (rangeMode ? `  ·  Câu ${currentQ.no} trong bài` : '');
     DOM.qText.innerText = currentQ.question_text;
+    MB.count.textContent = `Câu ${currentIndex + 1}/${totalUniqueQuestions}`;
+    MB.prev.disabled = currentIndex === 0;
+    MB.next.classList.remove('ready');
+    MB.next.innerHTML = 'Bỏ qua <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>';
 
     OPT_LETTERS.forEach((opt, idx) => {
         const text = currentQ['opt_' + opt.toLowerCase()];
@@ -596,7 +788,7 @@ function showSolved() {
         el.onclick = null;
         if (el.dataset.opt === currentQ.correct_opt) {
             el.classList.add('correct');
-            el.querySelector('.qz-icon-check').innerText = '✔';
+            el.querySelector('.qz-icon-check').innerHTML = '<i class="fa-solid fa-check" aria-hidden="true"></i>';
         }
     }
     if (currentQ.explanation && currentQ.explanation.trim() !== '') {
@@ -604,6 +796,8 @@ function showSolved() {
         DOM.expl.style.display = 'block';
     }
     DOM.nextBtn.style.display = 'block';
+    MB.next.classList.add('ready');
+    MB.next.innerHTML = 'Câu tiếp <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>';
 }
 
 function selectOption(selectedOpt, optElement) {
@@ -611,20 +805,21 @@ function selectOption(selectedOpt, optElement) {
     if (optElement.classList.contains('disabled') || optElement.classList.contains('hidden')) return;
 
     if (selectedOpt === currentQ.correct_opt) {
-        // ĐÚNG -> khóa, tô xanh, pháo hoa, cây lớn thêm
+        // ĐÚNG -> khóa, tô xanh, pháo hoa, âm thanh
         currentQ.done = true;
         currentQ.firstTry = currentQ.wrongOpts.length === 0;
         showSolved();
         launchFireworks();
-        updateTree(true);
+        playSound('correct');
         DOM.progFill.style.width = (countDone() / totalUniqueQuestions * 100) + '%';
         renderNav();
     } else {
         // SAI -> ẩn phương án vừa chọn, chọn lại đến khi đúng
         currentQ.wrongOpts.push(selectedOpt);
         totalWrongClicks++;
+        playSound('wrong');
         optElement.classList.add('wrong');
-        optElement.querySelector('.qz-icon-check').innerText = '✕';
+        optElement.querySelector('.qz-icon-check').innerHTML = '<i class="fa-solid fa-xmark" aria-hidden="true"></i>';
         optElement.onclick = null;
         setTimeout(() => optElement.classList.add('hidden'), 400);
     }
@@ -645,16 +840,19 @@ function showResults() {
     DOM.content.style.display = 'none';
     DOM.progressContainer.style.display = 'none';
     DOM.results.style.display = 'block';
+    MB.bar.style.display = 'none';
+    closeNav();
 
     const ok = countCorrect();
     const total = totalUniqueQuestions;
     const accuracy = total > 0 ? Math.round(ok / total * 100) : 0;
     document.getElementById('scorePercent').innerText = accuracy + '%';
 
-    let detail = `Bạn đã trả lời đúng ${ok}/${total} câu hỏi ở lần thử đầu tiên.\nSố lần chọn sai: ${totalWrongClicks}.\nThời gian làm bài: ${fmtTime(Date.now() - startTime)}.`;
+    const rangeInfo = rangeMode ? `Phạm vi thi: câu ${rangeFrom} – ${rangeTo}.\n` : '';
+    let detail = rangeInfo + `Bạn đã trả lời đúng ${ok}/${total} câu hỏi ở lần thử đầu tiên.\nSố lần chọn sai: ${totalWrongClicks}.\nThời gian làm bài: ${fmtTime(Date.now() - startTime)}.`;
     if (timeUp) {
-        document.getElementById('resultTitle').innerText = '⏰ Hết giờ!';
-        detail = `Bạn hoàn thành ${countDone()}/${total} câu, đúng ngay lần đầu ${ok} câu.\nCòn ${total - countDone()} câu chưa làm.\nSố lần chọn sai: ${totalWrongClicks}.`;
+        document.getElementById('resultTitle').innerHTML = '<i class="fa-solid fa-hourglass-end" aria-hidden="true"></i> Hết giờ!';
+        detail = rangeInfo + `Bạn hoàn thành ${countDone()}/${total} câu, đúng ngay lần đầu ${ok} câu.\nCòn ${total - countDone()} câu chưa làm.\nSố lần chọn sai: ${totalWrongClicks}.`;
     } else {
         launchFireworks();
     }
@@ -705,14 +903,13 @@ document.getElementById('btnEditQ').onclick = function () {
         currentQ.correct_opt = u.correct_opt;
         currentQ.explanation = u.explanation;
 
-        // Đổi đáp án đúng -> kết quả đã làm trước đó không còn đúng nghĩa, cho làm lại câu này
+        // Đổi đáp án đúng -> cho làm lại câu này
         if (correctChanged) {
             currentQ.done = false;
             currentQ.firstTry = false;
             currentQ.wrongOpts = [];
         }
         renderQuestion();
-        updateTree(false);
     });
 };
 
@@ -736,33 +933,6 @@ document.addEventListener('keydown', e => {
         nextQuestion();
     }
 });
-
-// ================= TRỒNG CÂY =================
-const TREE = {
-    box: document.getElementById('quizTree'),
-    plant: document.getElementById('treePlant'),
-    fruit: document.getElementById('treeFruit'),
-    label: document.getElementById('treeLabel')
-};
-
-function updateTree(animate) {
-    const ok = countCorrect();
-    const ratio = totalUniqueQuestions > 0 ? ok / totalUniqueQuestions : 0;
-    TREE.plant.style.transform = `scale(${0.15 + ratio * 0.85})`;
-    TREE.fruit.style.opacity = ratio >= 1 ? 1 : 0;
-
-    let icon = '🌱';
-    if (ratio >= 1) icon = '🍎';
-    else if (ratio >= 0.5) icon = '🌳';
-    else if (ratio > 0) icon = '🌿';
-    TREE.label.innerText = `${icon} ${ok}/${totalUniqueQuestions}`;
-
-    if (animate) {
-        TREE.box.classList.remove('pop');
-        void TREE.box.offsetWidth;
-        TREE.box.classList.add('pop');
-    }
-}
 
 // ================= PHÁO HOA =================
 const fwCanvas = document.getElementById('fireworksCanvas');
@@ -828,14 +998,23 @@ function launchFireworks() {
     }
 }
 
-// ================= THIẾT LẬP BÀI LÀM (CHỌN NGẪU NHIÊN xx CÂU TRONG yy PHÚT) =================
+// ================= THIẾT LẬP BÀI LÀM (NGẪU NHIÊN xx CÂU hoặc THEO PHẠM VI CÂU x -> y) =================
 const SETUP = {
     box: document.getElementById('setupScreen'),
     count: document.getElementById('setupCount'),
     minutes: document.getElementById('setupMinutes'),
     shuffle: document.getElementById('setupShuffle'),
+    shuffleText: document.getElementById('shuffleText'),
+    from: document.getElementById('setupFrom'),
+    to: document.getElementById('setupTo'),
+    fieldRandom: document.getElementById('fieldRandom'),
+    fieldRange: document.getElementById('fieldRange'),
+    rangeSummary: document.getElementById('rangeSummary'),
+    error: document.getElementById('setupError'),
     layout: document.getElementById('quizLayout')
 };
+let rangeMode = false;   // true = đang thi theo phạm vi câu
+let rangeFrom = 1, rangeTo = 1;
 
 function shuffleArray(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -845,30 +1024,71 @@ function shuffleArray(arr) {
     return arr;
 }
 
-function addPresets(containerId, values, input, suffix) {
+function addPresets(containerId, values, apply) {
     const wrap = document.getElementById(containerId);
     values.forEach(v => {
         const b = document.createElement('button');
         b.type = 'button';
         b.textContent = v.label;
-        b.onclick = () => { input.value = v.value; };
+        b.onclick = () => apply(v);
         wrap.appendChild(b);
     });
 }
 
-function startQuiz() {
+const getMode = () => document.querySelector('input[name="setupMode"]:checked').value;
+function showSetupError(msg) { SETUP.error.textContent = msg; SETUP.error.style.display = 'block'; SETUP.error.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+function clearSetupError() { SETUP.error.style.display = 'none'; }
+
+function updateRangeSummary() {
     const total = questionPool.length;
-    let n = parseInt(SETUP.count.value, 10);
-    if (isNaN(n) || n < 1) n = total;
-    n = Math.min(n, total);
+    const f = parseInt(SETUP.from.value, 10), t = parseInt(SETUP.to.value, 10);
+    if (isNaN(f) || isNaN(t) || f < 1 || t > total || f > t) {
+        SETUP.rangeSummary.textContent = `Nhập phạm vi trong khoảng 1 – ${total} (câu bắt đầu ≤ câu kết thúc).`;
+    } else {
+        SETUP.rangeSummary.textContent = `Sẽ thi ${t - f + 1} câu (từ câu ${f} đến câu ${t}).`;
+    }
+}
+
+function applyMode() {
+    const range = getMode() === 'range';
+    SETUP.fieldRandom.style.display = range ? 'none' : '';
+    SETUP.fieldRange.style.display = range ? '' : 'none';
+    SETUP.shuffle.checked = !range; // theo phạm vi: mặc định giữ nguyên thứ tự câu
+    SETUP.shuffleText.textContent = range ? 'Xáo trộn thứ tự các câu trong phạm vi' : 'Chọn ngẫu nhiên và xáo trộn thứ tự câu hỏi';
+    clearSetupError();
+    if (range) updateRangeSummary();
+}
+
+function startQuiz() {
+    clearSetupError();
+    const total = questionPool.length;
+    const range = getMode() === 'range';
+    let picked;
+
+    if (range) {
+        const f = parseInt(SETUP.from.value, 10);
+        const t = parseInt(SETUP.to.value, 10);
+        if (isNaN(f) || isNaN(t)) return showSetupError('Hãy nhập cả câu bắt đầu và câu kết thúc.');
+        if (f < 1 || t > total) return showSetupError(`Phạm vi hợp lệ là từ câu 1 đến câu ${total}.`);
+        if (f > t) return showSetupError('Câu bắt đầu phải nhỏ hơn hoặc bằng câu kết thúc.');
+        rangeMode = true; rangeFrom = f; rangeTo = t;
+        picked = questionPool.slice(f - 1, t);
+        if (SETUP.shuffle.checked) shuffleArray(picked);
+    } else {
+        let n = parseInt(SETUP.count.value, 10);
+        if (isNaN(n) || n < 1) n = total;
+        n = Math.min(n, total);
+        rangeMode = false;
+        picked = questionPool.slice();
+        if (SETUP.shuffle.checked) shuffleArray(picked);
+        picked = picked.slice(0, n);
+    }
 
     let mins = parseFloat(SETUP.minutes.value);
     if (isNaN(mins) || mins < 0) mins = 0;
     mins = Math.min(mins, 600);
 
-    const picked = questionPool.slice();
-    if (SETUP.shuffle.checked) shuffleArray(picked);
-    allQuestions = picked.slice(0, n);
+    allQuestions = picked;
     totalUniqueQuestions = allQuestions.length;
 
     allQuestions.forEach(q => { q.done = false; q.firstTry = false; q.wrongOpts = []; });
@@ -878,36 +1098,55 @@ function startQuiz() {
     quizStarted = true;
     startTime = Date.now();
 
+    unlockAudio(); // đang trong thao tác bấm nút nên trình duyệt cho phép
     SETUP.box.style.display = 'none';
     SETUP.layout.style.display = '';
-    TREE.box.style.display = '';
 
     if (mins > 0) startTimer(mins * 60000);
-    updateTree(false);
     renderQuestion();
 }
 
 if (questionPool.length > 0) {
-    document.getElementById('poolCount').innerText = questionPool.length;
-    SETUP.count.max = questionPool.length;
-    SETUP.count.value = questionPool.length;
-
     const t = questionPool.length;
+    document.getElementById('poolCount').innerText = t;
+    SETUP.count.max = t;
+    SETUP.count.value = t;
+    SETUP.from.max = t; SETUP.to.max = t;
+    SETUP.from.value = 1; SETUP.to.value = t;
+
     const countOpts = [5, 10, 20, 30].filter(v => v < t).map(v => ({ label: v + ' câu', value: v }));
     countOpts.push({ label: 'Tất cả (' + t + ')', value: t });
-    addPresets('countPresets', countOpts, SETUP.count);
+    addPresets('countPresets', countOpts, v => { SETUP.count.value = v.value; });
     addPresets('minutePresets', [
         { label: '5 phút', value: 5 }, { label: '10 phút', value: 10 },
         { label: '15 phút', value: 15 }, { label: '30 phút', value: 30 },
         { label: 'Không giới hạn', value: '' }
-    ], SETUP.minutes);
+    ], v => { SETUP.minutes.value = v.value; });
+
+    // Gợi ý phạm vi: Tất cả + chia theo khối (tối đa ~10 nút)
+    const size = [5, 10, 20, 25, 50, 100, 200].find(s => Math.ceil(t / s) <= 10) || 500;
+    const rangeOpts = [{ label: 'Tất cả (1–' + t + ')', from: 1, to: t }];
+    if (t > size) {
+        for (let s = 1; s <= t; s += size) {
+            const e = Math.min(s + size - 1, t);
+            rangeOpts.push({ label: s + '–' + e, from: s, to: e });
+        }
+    }
+    addPresets('rangePresets', rangeOpts, v => {
+        SETUP.from.value = v.from; SETUP.to.value = v.to;
+        clearSetupError(); updateRangeSummary();
+    });
+
+    document.querySelectorAll('input[name="setupMode"]').forEach(r => r.addEventListener('change', applyMode));
+    [SETUP.from, SETUP.to].forEach(el => el.addEventListener('input', () => { clearSetupError(); updateRangeSummary(); }));
 
     document.getElementById('btnStart').onclick = startQuiz;
-    [SETUP.count, SETUP.minutes].forEach(el => el.addEventListener('keydown', e => {
+    [SETUP.count, SETUP.minutes, SETUP.from, SETUP.to].forEach(el => el.addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); startQuiz(); }
     }));
     SETUP.box.style.display = 'block';
-    SETUP.count.focus();
+    // Trên điện thoại không tự focus để bàn phím không che màn hình thiết lập
+    if (!window.matchMedia('(hover: none)').matches) SETUP.count.focus();
 } else {
     // Bài chưa có câu hỏi nào
     SETUP.layout.style.display = '';

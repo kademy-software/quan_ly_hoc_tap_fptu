@@ -31,33 +31,23 @@ $pendingFap = $db->prepare('SELECT COUNT(*) c FROM fap_submissions WHERE student
 $pendingFap->execute([$sid]);
 $pendingFap = $pendingFap->fetch()['c'];
 
-// Lich hoc theo tuan (du lieu lay tu FAP -> bang fap_sessions)
-fapEnsureTable($db);
-$baseTs = (isset($_GET['week']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['week']) && ($t = strtotime($_GET['week'])) !== false) ? $t : time();
-$weekStartTs = strtotime('monday this week', $baseTs);
+// Lịch học theo tuần — Sử dụng hàm dùng chung getWeekScheduleData để đồng bộ 100% với schedule.php
+$weekParam = (isset($_GET['week']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['week'])) ? $_GET['week'] : date('Y-m-d');
+$weekSchedule = getWeekScheduleData($db, $sid, $weekParam);
+$weekDates = $weekSchedule['week_dates'];
+$weekGrid = $weekSchedule['grid'];
+$slotTimes = $weekSchedule['slot_times'];
+$weekSessionCount = $weekSchedule['total_sessions'];
+$prevWeek = $weekSchedule['prev_week'];
+$nextWeek = $weekSchedule['next_week'];
+
 $semStartWeekTs = strtotime('monday this week', strtotime(QLHT_SEMESTER_START));
-if ($weekStartTs < $semStartWeekTs) $weekStartTs = $semStartWeekTs;          // không xem trước ngày bắt đầu
-$hasPrevWeek = $weekStartTs > $semStartWeekTs;
-$homeWeekTs  = max(strtotime('monday this week'), $semStartWeekTs);         // tuần mặc định: tuần này, hoặc tuần đầu kỳ nếu chưa tới
-$isHomeWeek  = $weekStartTs === $homeWeekTs;
-$homeLabel   = strtotime('monday this week') < $semStartWeekTs ? 'Tuần đầu kỳ' : 'Tuần này';
-$weekDates = [];
-for ($i = 0; $i < 7; $i++) $weekDates[] = date('Y-m-d', strtotime("+$i days", $weekStartTs));
-$prevWeek = date('Y-m-d', strtotime('-7 days', $weekStartTs));
-$nextWeek = date('Y-m-d', strtotime('+7 days', $weekStartTs));
+$currWeekTs = strtotime($weekSchedule['from']);
+$hasPrevWeek = true;
+$isHomeWeek = ($weekSchedule['from'] === date('Y-m-d', strtotime('monday this week')));
+$homeLabel = 'Tuần này';
 $todayStr = date('Y-m-d');
 $dayShort = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-
-$wk = $db->prepare('SELECT fs.*, s.subject_name, s.color FROM fap_sessions fs LEFT JOIN subjects s ON s.id = fs.subject_id WHERE fs.student_id = ? AND fs.session_date BETWEEN ? AND ? ORDER BY fs.slot_number');
-$wk->execute([$sid, $weekDates[0], $weekDates[6]]);
-$weekGrid = []; $slotTimes = [];
-foreach ($wk->fetchAll() as $r) {
-    $n = (int)$r['slot_number'];
-    $weekGrid[$n][$r['session_date']][] = $r;
-    if ($r['start_time'] && empty($slotTimes[$n])) $slotTimes[$n] = $r['start_time'] . '-' . $r['end_time'];
-}
-ksort($weekGrid);
-$weekSessionCount = array_sum(array_map(fn($byDate) => array_sum(array_map('count', $byDate)), $weekGrid));
 
 // Tính % hoàn thành Deadline
 $totalDeadlines = $db->prepare('SELECT COUNT(*) c FROM deadlines WHERE student_id = ?');
@@ -134,41 +124,61 @@ include __DIR__ . '/includes/header.php';
         <h2>Lịch học tuần <?= date('d/m', strtotime($weekDates[0])) ?> - <?= date('d/m/Y', strtotime($weekDates[6])) ?>
             <small style="font-weight:400; color:var(--text-dim);">(<?= (int)$weekSessionCount ?> buổi · học kỳ bắt đầu <?= date('d/m/Y', strtotime(QLHT_SEMESTER_START)) ?>)</small></h2>
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <?php if ($hasPrevWeek): ?><a class="btn btn-outline btn-sm" href="index.php?week=<?= $prevWeek ?>#week-mini">◀ Tuần trước</a><?php else: ?><span class="btn btn-outline btn-sm" style="opacity:.4; cursor:not-allowed;">◀ Tuần trước</span><?php endif; ?>
+            <?php if ($hasPrevWeek): ?><a class="btn btn-outline btn-sm" href="index.php?week=<?= $prevWeek ?>#week-mini"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Tuần trước</a><?php else: ?><span class="btn btn-outline btn-sm" style="opacity:.4; cursor:not-allowed;"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Tuần trước</span><?php endif; ?>
             <?php if (!$isHomeWeek): ?><a class="btn btn-accent btn-sm" href="index.php#week-mini"><?= $homeLabel ?></a><?php endif; ?>
-            <a class="btn btn-outline btn-sm" href="index.php?week=<?= $nextWeek ?>#week-mini">Tuần sau ▶</a>
+            <a class="btn btn-outline btn-sm" href="index.php?week=<?= $nextWeek ?>#week-mini">Tuần sau <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>
             <a class="btn btn-outline btn-sm" href="schedule.php">Xem danh sách</a>
         </div>
     </div>
 
     <?php if ($weekGrid): ?>
     <div style="overflow-x:auto;">
-        <table style="width:100%; min-width:680px; table-layout:fixed; border-collapse:collapse; font-size:12px;">
+        <table style="width:100%; min-width:760px; table-layout:fixed; border-collapse:collapse; font-size:14px;">
             <thead>
                 <tr>
-                    <th style="width:72px; text-align:left; padding:6px 4px;">Slot</th>
+                    <th style="width:84px; text-align:left; padding:8px 6px;">Slot</th>
                     <?php foreach ($weekDates as $i => $dt): ?>
-                        <th style="text-align:center; padding:6px 4px; <?= $dt === $todayStr ? 'color:var(--accent);' : '' ?>">
-                            <?= $dayShort[$i] ?><br><span style="font-weight:400;"><?= date('d/m', strtotime($dt)) ?></span>
+                        <th style="text-align:center; padding:8px 6px; <?= $dt === $todayStr ? 'color:var(--accent); font-weight:800;' : '' ?>">
+                            <?= $dayShort[$i] ?><br><span style="font-weight:400; font-size:13px;"><?= date('d/m', strtotime($dt)) ?></span>
                         </th>
                     <?php endforeach; ?>
                 </tr>
             </thead>
             <tbody>
             <?php foreach ($weekGrid as $slotNo => $byDate): ?>
-                <tr style="border-top:1px solid rgba(255,255,255,.08);">
-                    <td style="padding:6px 4px; vertical-align:top;">
-                        <strong><?= (int)$slotNo ?></strong><br>
-                        <span style="color:var(--text-dim); font-size:11px;"><?= htmlspecialchars($slotTimes[$slotNo] ?? '') ?></span>
+                <tr>
+                    <td style="padding:8px 6px; vertical-align:top; border-top:1px solid var(--border);">
+                        <?php if ($slotNo === 0): ?>
+                            <strong style="color:var(--orange); font-size:13px;">Sự kiện</strong>
+                        <?php else: ?>
+                            <strong style="font-size:15px;">Slot <?= (int)$slotNo ?></strong><br>
+                            <span style="color:var(--text-dim); font-size:12px;"><?= htmlspecialchars($slotTimes[$slotNo] ?? '') ?></span>
+                        <?php endif; ?>
                     </td>
                     <?php foreach ($weekDates as $dt): ?>
-                        <td style="padding:4px; vertical-align:top; <?= $dt === $todayStr ? 'background:rgba(34,197,94,.08);' : '' ?>">
+                        <td style="padding:6px; vertical-align:top; border-top:1px solid var(--border); <?= $dt === $todayStr ? 'background:rgba(37,99,235,.04);' : '' ?>">
                             <?php foreach ($byDate[$dt] ?? [] as $r): ?>
-                                <div title="<?= htmlspecialchars($r['subject_name'] ?? $r['subject_code']) ?>"
-                                     style="border-left:3px solid <?= htmlspecialchars($r['color'] ?: '#64748b') ?>; background:rgba(255,255,255,.05); padding:4px 6px; border-radius:6px; line-height:1.35; <?= $r['status'] === 'absent' ? 'opacity:.7;' : '' ?>">
-                                    <strong><?= htmlspecialchars($r['subject_code']) ?></strong>
-                                    <?= $r['status'] === 'attended' ? '<span style="color:var(--accent);">✔</span>' : ($r['status'] === 'absent' ? '<span style="color:var(--red);">✖</span>' : '') ?>
-                                    <?php if ($r['room']): ?><br><span style="color:var(--text-dim);"><?= htmlspecialchars($r['room']) ?></span><?php endif; ?>
+                                <div title="<?= htmlspecialchars($r['name'] ?? $r['code']) ?>"
+                                     style="border-left:3px solid <?= htmlspecialchars($r['color'] ?: '#2563EB') ?>; background:var(--bg-panel-2); padding:6px 8px; border-radius:6px; line-height:1.4; margin-bottom:4px; <?= ($r['status'] ?? '') === 'absent' ? 'opacity:.7;' : '' ?>">
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <strong style="font-size:14px;"><?= htmlspecialchars($r['code']) ?></strong>
+                                        <?php if (($r['kind'] ?? '') === 'fap'): ?>
+                                            <span style="font-size:10px; padding:1px 4px; border-radius:4px; background:rgba(37,99,235,.12); color:var(--blue); font-weight:700;">FAP</span>
+                                        <?php elseif (($r['kind'] ?? '') === 'fixed'): ?>
+                                            <span style="font-size:10px; padding:1px 4px; border-radius:4px; background:rgba(100,116,139,.15); color:var(--text-dim); font-weight:600;">Cố định</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if (!empty($r['name']) && $r['name'] !== $r['code']): ?>
+                                        <div style="font-size:12px; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><?= htmlspecialchars($r['name']) ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($r['room'])): ?>
+                                        <div style="font-size:12px; color:var(--text-dim);"><i class="fa-solid fa-location-dot" style="font-size:10px;" aria-hidden="true"></i> <?= htmlspecialchars($r['room']) ?></div>
+                                    <?php endif; ?>
+                                    <?php if (($r['status'] ?? '') === 'attended'): ?>
+                                        <span style="color:var(--green); font-size:12px;"><i class="fa-solid fa-check" aria-hidden="true"></i> Có mặt</span>
+                                    <?php elseif (($r['status'] ?? '') === 'absent'): ?>
+                                        <span style="color:var(--red); font-size:12px;"><i class="fa-solid fa-xmark" aria-hidden="true"></i> Vắng</span>
+                                    <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
                         </td>
@@ -179,7 +189,7 @@ include __DIR__ . '/includes/header.php';
         </table>
     </div>
     <?php else: ?>
-        <div class="empty-state">Tuần này không có buổi học nào. 🎉 <a href="schedule.php">Cập nhật dữ liệu từ FAP</a></div>
+        <div class="empty-state"><i class="fa-solid fa-calendar-check" aria-hidden="true"></i> Tuần này không có buổi học nào. <a href="schedule.php">Xếp lịch hoặc cập nhật từ FAP</a></div>
     <?php endif; ?>
 </div>
 

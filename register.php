@@ -78,13 +78,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Đăng ký - QLHT</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/theme.css">
+<script src="assets/js/theme.js"></script>
 </head>
 <body>
 <div class="login-wrap">
     <div class="login-card" style="max-width: 440px;">
-        <h1>Đăng ký tài khoản QLHT</h1>
-        <p>Tạo tài khoản để quản lý việc học của riêng bạn</p>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+            <div class="logo" style="width:38px; height:38px; border-radius:8px; background:linear-gradient(135deg, var(--accent), var(--accent-dark)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:18px;">QL</div>
+            <strong style="font-size:20px; color:var(--text);">QLHT</strong>
+        </div>
+        <h1 style="font-size:22px; margin:0 0 4px;">Đăng ký tài khoản</h1>
+        <p style="color:var(--text-dim); margin-top:0; margin-bottom:20px; font-size:14px;">Tạo tài khoản để quản lý việc học của riêng bạn</p>
 
         <?php foreach ($errors as $err): ?>
             <div class="flash error"><?= htmlspecialchars($err) ?></div>
@@ -115,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label>Nhập lại mật khẩu</label>
                 <input type="password" name="password_confirm" minlength="8" required>
             </div>
-            <button type="submit" class="btn btn-accent" style="width:100%">Đăng ký</button>
+            <button type="submit" class="btn btn-accent" style="width:100%"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> Đăng ký tài khoản</button>
         </form>
 
         <p style="margin: 16px 0 0; text-align: center;">
