@@ -1,292 +1,96 @@
-# Quản lý học tập FPTU
+# QLHT — Quản lý Học tập
 
-Hệ thống hỗ trợ sinh viên FPT University quản lý việc học tập, theo dõi tiến độ và tập trung các thông tin học tập vào một nền tảng duy nhất.
+> **Mọi thứ sinh viên cần nhớ, gom vào một nơi.**
 
-## Tổng quan
+QLHT là ứng dụng web giúp sinh viên theo dõi lịch học, điểm số, chuyên cần, deadline và kế hoạch tự học trên một dashboard duy nhất, có đồng bộ lịch học từ FAP và công cụ tạo quiz ôn tập bằng AI.
 
-**Quản lý học tập FPTU** được xây dựng nhằm giải quyết nhu cầu quản lý các hoạt động học tập hằng ngày của sinh viên, bao gồm:
+![Dashboard](screenshots/dashboard.png)
 
-* Quản lý thời khóa biểu
-* Theo dõi điểm số và GPA
-* Quản lý môn học
-* Theo dõi chuyên cần
-* Quản lý công việc và kế hoạch học tập
-* Tự học và theo dõi tiến độ
-* Làm bài Quiz và Assessment
-* Xem kết quả đánh giá
-* Quản lý hồ sơ cá nhân
-* Theo dõi trạng thái học tập
+**Điểm nổi bật**
+- Dashboard tuần: lịch học, deadline sắp tới, tiến độ tự học
+- Đồng bộ lịch học từ FAP bằng token cá nhân
+- Tạo quiz từ nội dung bài học bằng Google Gemini
+- Phân quyền admin / sinh viên, dữ liệu tách theo từng tài khoản
 
-## Tính năng
+## Vấn đề
 
-### Dashboard
+Lịch học nằm trên FAP, điểm ở một nơi, deadline trong ghi chú, kế hoạch tự học trong đầu. Mỗi lần cần biết "tuần này mình phải làm gì" là phải mở nhiều chỗ và tự ghép lại.
 
-Cung cấp tổng quan nhanh về tình hình học tập:
+## Giải pháp
 
-* Lịch học
-* Tiến độ học tập
-* Điểm số
-* Công việc cần hoàn thành
-* Các hoạt động học tập gần đây
+QLHT đưa các thông tin đó vào một ứng dụng: lịch tuần, điểm, chuyên cần, việc cần làm và module tự học cùng hiển thị trên trang chủ. Phần việc lặp lại như nhập lịch học hay soạn câu hỏi ôn tập được tự động hóa.
+
+## Tính năng đã triển khai
+
+Danh sách dưới đây được đối chiếu với mã nguồn.
+
+### Dashboard tuần
+Trang chủ hiển thị lịch học tuần, deadline sắp tới, tiến độ tự học trong tuần và danh sách môn học của kỳ.
+![Dashboard](screenshots/dashboard.png)
+*Dashboard tổng quan theo tuần.*
 
 ### Thời khóa biểu
-
-Quản lý lịch học theo ngày và tuần.
-
-Các thông tin có thể theo dõi:
-
-* Môn học
-* Thời gian
-* Phòng học
-* Giảng viên
-* Trạng thái buổi học
-
-### Quản lý điểm
-
-Theo dõi kết quả học tập của từng môn học.
-
-Hệ thống hỗ trợ:
-
-* Điểm thành phần
-* Điểm tổng kết
-* GPA
-* Danh sách môn học
-* Theo dõi kết quả học tập
-
-### Quiz
-
-Hệ thống Quiz hỗ trợ tạo và thực hiện các bài kiểm tra trực tuyến.
-
-Các chức năng chính:
-
-* Tạo Quiz
-* Quản lý câu hỏi
-* Làm Quiz
-* Chấm điểm
-* Lưu kết quả
-* Xem kết quả sau khi hoàn thành
-
-### Assessment
-
-Hỗ trợ thực hiện các bài đánh giá học tập và lưu trữ kết quả.
-
-Bao gồm:
-
-* Thực hiện Assessment
-* Xử lý câu trả lời
-* Tính kết quả
-* Hiển thị kết quả đánh giá
-
-### Attendance
-
-Theo dõi tình trạng chuyên cần của sinh viên.
-
-### Công việc cá nhân
-
-Quản lý các nhiệm vụ cần hoàn thành trong quá trình học tập.
-
-* Thêm nhiệm vụ
-* Theo dõi trạng thái
-* Đánh dấu hoàn thành
-* Quản lý danh sách công việc
-
-### Tự học
-
-Hỗ trợ sinh viên quản lý hoạt động tự học và xây dựng thói quen học tập.
-
-### Môn học
-
-Quản lý danh sách các môn học trong chương trình.
-
-### Hồ sơ cá nhân
-
-Quản lý các thông tin cá nhân và thông tin học tập của người dùng.
-
-## Công nghệ sử dụng
-
-### Backend
-
-* PHP
-* MySQL
-
-### Frontend
-
-* HTML5
-* CSS3
-* JavaScript
-
-### Môi trường phát triển
-
-* XAMPP
-* Apache
-* MySQL
-
-## Cấu trúc dự án
-
-```text
-quan_ly_hoc_tap_fptu/
-│
-├── api/                    # API xử lý dữ liệu
-├── assets/                 # CSS, JavaScript, hình ảnh và tài nguyên
-├── config/                 # Cấu hình hệ thống và cơ sở dữ liệu
-├── includes/               # Thành phần PHP dùng chung
-│
-├── index.php               # Trang chính
-├── login.php               # Đăng nhập
-├── logout.php              # Đăng xuất
-├── profile.php             # Hồ sơ cá nhân
-│
-├── schedule.php            # Thời khóa biểu
-├── subjects.php            # Quản lý môn học
-├── grades.php              # Quản lý điểm
-├── attendance.php          # Chuyên cần
-├── todos.php               # Công việc
-├── self_study.php          # Tự học
-│
-├── quiz_create.php         # Tạo Quiz
-├── quiz_take.php           # Làm Quiz
-├── assessments.php         # Danh sách Assessment
-├── take_assessment.php     # Thực hiện Assessment
-├── assessment_result.php   # Kết quả Assessment
-│
-├── fap.php                 # FAP
-├── online.php              # Thông tin học tập trực tuyến
-├── labs.php                # Lab
-│
-├── database.sql            # Cấu trúc và dữ liệu cơ sở dữ liệu
-└── README.md
-```
-
-## Cài đặt
-
-### 1. Clone repository
-
-```bash
-git clone https://github.com/kademy-software/quan_ly_hoc_tap_fptu.git
-cd quan_ly_hoc_tap_fptu
-```
-
-### 2. Đưa project vào XAMPP
-
-Copy project vào:
-
-```text
-C:\xampp\htdocs\
-```
-
-Ví dụ:
-
-```text
-C:\xampp\htdocs\qlht
-```
-
-### 3. Khởi động XAMPP
-
-Khởi động:
-
-* Apache
-* MySQL
-
-### 4. Tạo cơ sở dữ liệu
-
-Mở:
-
-```text
-http://localhost/phpmyadmin
-```
-
-Tạo database theo cấu hình của project, sau đó import:
-
-```text
-database.sql
-```
-
-### 5. Cấu hình database
-
-Kiểm tra thông tin kết nối trong thư mục:
-
-```text
-config/
-```
-
-Cập nhật:
-
-```text
-DB_HOST
-DB_NAME
-DB_USER
-DB_PASSWORD
-```
-
-phù hợp với môi trường của bạn.
-
-### 6. Chạy hệ thống
-
-Mở trình duyệt và truy cập:
-
-```text
-http://localhost/qlht
-```
-
-## Database
-
-File:
-
-```text
-database.sql
-```
-
-chứa cấu trúc cơ sở dữ liệu phục vụ hệ thống.
-
-Các nhóm dữ liệu chính bao gồm:
-
-* Người dùng
-* Môn học
-* Điểm số
-* Thời khóa biểu
-* Chuyên cần
-* Công việc
-* Quiz
-* Câu hỏi
-* Kết quả Quiz
-* Assessment
-* Kết quả Assessment
-
-## Mục tiêu phát triển
-
-Dự án hướng tới việc xây dựng một hệ thống quản lý học tập tập trung, giúp sinh viên:
-
-> **Theo dõi việc học — quản lý tiến độ — chủ động cải thiện kết quả.**
-
-Trong các phiên bản tiếp theo, hệ thống có thể được mở rộng với:
-
-* Thống kê học tập nâng cao
-* Biểu đồ GPA
-* Phân tích tiến độ học tập
-* Nhắc lịch học và deadline
-* Hệ thống thông báo
-* Mobile responsive tốt hơn
-* Phân quyền người dùng
-* API phục vụ ứng dụng mobile
-* Tích hợp các dịch vụ học tập khác
-
-## Đóng góp
-
-Nếu muốn đóng góp cho dự án:
-
-1. Fork repository
-2. Tạo branch mới
-3. Thực hiện thay đổi
-4. Commit thay đổi
-5. Push branch
-6. Tạo Pull Request
-
-## License
-
-Dự án được phát triển cho mục đích học tập và nghiên cứu.
-
----
-
-**Kademy Software**
-
-Quản lý học tập FPTU — một nơi để gom đống thứ sinh viên phải nhớ vào một chỗ :)))
+Xếp lịch cố định hằng tuần từ danh sách môn học; các buổi đồng bộ từ FAP được đánh dấu riêng bằng nhãn FAP.
+![Thời khóa biểu](screenshots/weekly-schedule.png)
+*Lịch tuần, buổi học từ FAP có nhãn riêng.*
+
+### Điểm số và chuyên cần
+Quản lý điểm thành phần theo môn, tổng kết, và ghi nhận điểm danh.
+![Điểm số](screenshots/academic-performance.png)
+*Trang quản lý điểm.*
+
+### Việc cần làm và tự học
+Danh sách deadline, theo dõi trạng thái, cùng các module tự học. Ngoài ra có trang tiến độ học tập với mục tiêu và phân trang.
+![Deadline](screenshots/tasks-and-deadlines.png)
+*Việc cần làm (deadline).*
+![Tự học](screenshots/self-study.png)
+*Các module tự học.*
+
+### Quiz và Assessment
+Tạo quiz thủ công hoặc bằng AI (dán nội dung bài học từ 200 đến 30.000 ký tự, tối đa 30 câu), làm bài, chấm điểm và xem lại kết quả. Assessment lưu từng lượt làm bài.
+![Quiz](screenshots/learning-tools.png)
+*Trang tạo quiz.*
+
+### Đồng bộ FAP
+Lấy lịch học từ FAP qua token cá nhân (bookmarklet, Automa hoặc cookie) hoặc script CLI `scripts/sync_fap.php`; có thể chọn khoảng ngày cần lấy. Hệ thống lưu thời điểm và kết quả lần đồng bộ gần nhất.
+
+### Các module khác
+Kho video bài giảng (tự quét thư mục, thumbnail, trạng thái đã xem), đơn gửi trên FAP, và góc An ninh mạng gồm lab tracker, payload/lệnh, writeup, chứng chỉ.
+
+## Trải nghiệm sử dụng
+
+1. Đăng nhập, mở dashboard để xem lịch học và deadline của tuần.
+2. Đồng bộ lịch từ FAP khi có thay đổi, thay vì nhập tay.
+3. Ghi điểm và điểm danh sau mỗi môn; thêm deadline vào danh sách việc cần làm.
+4. Cuối buổi, dán nội dung bài học để tạo quiz ôn tập và làm thử.
+
+## Công nghệ
+
+| Tầng | Công nghệ (xác minh từ mã nguồn) |
+|---|---|
+| Backend | PHP thuần, PDO + prepared statements, session |
+| Cơ sở dữ liệu | MySQL / MariaDB (utf8mb4) |
+| Frontend | HTML5, CSS3, JavaScript thuần, Font Awesome (CDN) |
+| AI | Google Gemini API (REST) |
+| Môi trường dev | XAMPP / Apache |
+
+## Điểm nhấn kỹ thuật
+
+- **Tách trang và API:** trang PHP render giao diện, `api/*.php` trả JSON cho JavaScript.
+- **Cô lập dữ liệu:** truy vấn ràng buộc `student_id`, kể cả `UPDATE` / `DELETE`.
+- **Phân quyền đọc từ CSDL** mỗi request nên đổi vai trò có hiệu lực ngay.
+- **Bảo mật cơ bản:** `password_hash`, prepared statements, token CSRF ở trang tiến độ.
+- **AI không chặn người dùng:** `session_write_close()` trước khi chờ Gemini; có danh sách model dự phòng.
+- **Migration nhẹ:** `fapEnsureTable()` tự tạo bảng và thêm cột còn thiếu.
+
+## Lộ trình (dự kiến, chưa triển khai)
+
+- Biểu đồ GPA và thống kê học tập nâng cao
+- Nhắc lịch học và deadline, thông báo
+- Cải thiện giao diện mobile
+- API cho ứng dụng mobile
+- Cấu hình bằng `.env`, CSRF cho toàn bộ form
+
+## Cài đặt và sử dụng
+
+Xem hướng dẫn trong [README](../../README.md).
