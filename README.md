@@ -4,7 +4,7 @@
 
 QLHT là ứng dụng web giúp sinh viên theo dõi lịch học, điểm số, chuyên cần, deadline và kế hoạch tự học trên một dashboard duy nhất, có đồng bộ lịch học từ FAP và công cụ tạo quiz ôn tập bằng AI.
 
-![Dashboard](screenshots/dashboard.png)
+
 
 **Điểm nổi bật**
 - Dashboard tuần: lịch học, deadline sắp tới, tiến độ tự học
@@ -26,29 +26,27 @@ Danh sách dưới đây được đối chiếu với mã nguồn.
 
 ### Dashboard tuần
 Trang chủ hiển thị lịch học tuần, deadline sắp tới, tiến độ tự học trong tuần và danh sách môn học của kỳ.
-![Dashboard](screenshots/dashboard.png)
-*Dashboard tổng quan theo tuần.*
+
+
 
 ### Thời khóa biểu
 Xếp lịch cố định hằng tuần từ danh sách môn học; các buổi đồng bộ từ FAP được đánh dấu riêng bằng nhãn FAP.
-![Thời khóa biểu](screenshots/weekly-schedule.png)
+
 *Lịch tuần, buổi học từ FAP có nhãn riêng.*
 
 ### Điểm số và chuyên cần
 Quản lý điểm thành phần theo môn, tổng kết, và ghi nhận điểm danh.
-![Điểm số](screenshots/academic-performance.png)
+
 *Trang quản lý điểm.*
 
 ### Việc cần làm và tự học
 Danh sách deadline, theo dõi trạng thái, cùng các module tự học. Ngoài ra có trang tiến độ học tập với mục tiêu và phân trang.
-![Deadline](screenshots/tasks-and-deadlines.png)
-*Việc cần làm (deadline).*
-![Tự học](screenshots/self-study.png)
-*Các module tự học.*
+
+
 
 ### Quiz và Assessment
 Tạo quiz thủ công hoặc bằng AI (dán nội dung bài học từ 200 đến 30.000 ký tự, tối đa 30 câu), làm bài, chấm điểm và xem lại kết quả. Assessment lưu từng lượt làm bài.
-![Quiz](screenshots/learning-tools.png)
+
 *Trang tạo quiz.*
 
 ### Đồng bộ FAP
